@@ -10,7 +10,7 @@
 // #define true 1
 // #define false 2
 //I tipi di messaggi
-#define ARGUMENT 45645
+#define START 45645
 #define SOCKETCR 76567
 #define BINDADRS 43654
 #define SOCKETLS 63473
@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
     int returnStatus = 0;
     struct sockaddr_in simpleServer;
 
-    if (error_checking(2 == argc, ARGUMENT))
+    if (error_checking(2 == argc, START))
     {
         fprintf(stderr, "%s <port>'\n", argv[0]);
         exit(1);
@@ -108,8 +108,8 @@ int error_checking(int outcome, int type)
         // identifica il comando al quale la risposta fa riferimento, o la categoria di risposta.
         switch (type)
         {
-            case ARGUMENT:
-                fprintf(stderr, "ARGUMENT 'right arguments'\n");
+            case START:
+                fprintf(stderr, "START 'Welcome'\n");
                 return 0;
             case SOCKETCR:
                 fprintf(stderr, "SOCKETCR 'Socket created!'\n");
@@ -131,8 +131,8 @@ int error_checking(int outcome, int type)
         // identifica il comando al quale la risposta fa riferimento, o la categoria di risposta.
         switch (type)
         {
-            case ARGUMENT:
-                fprintf(stderr, "ARGUMENT 'Usage: ");
+            case START:
+                fprintf(stderr, "START 'Usage: ");
                 return 1;
             case SOCKETCR:
                 fprintf(stderr, "SOCKETCR 'Could not create a socket!'\n");
