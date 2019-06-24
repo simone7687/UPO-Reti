@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
         if(error_checking(simpleChildSocket != -1, CONNECTA))
         {
             close(simpleSocket);
-            //exit(1);
+            exit(1);
         }
 
         /* handle the new connection request  */
