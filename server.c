@@ -10,7 +10,7 @@
 // #define true 1
 // #define false 2
 //I tipi di messaggi
-#define START 45645
+#define ARGOMENT 45645
 #define SOCKETCR 76567
 #define BINDADRS 43654
 #define SOCKETLS 63473
@@ -19,19 +19,18 @@
 const char MESSAGE[] = "Hello UPO student!\n";
 
 // invia messaggi di errore del server
-int error_checking(int outcome, int type);
+int error_checking(int outcome, int type, int simpleChildSocket);
 
 int main(int argc, char *argv[])
 {
-    // lunghezza massima di 512 caratteri
-    char buffer[MAX_CHAR] = "";
-    
     int simpleSocket = 0;
     int simplePort = 0;
     int returnStatus = 0;
     struct sockaddr_in simpleServer;
+    
+    int clientNameLength = 0;
 
-    if (error_checking(2 == argc, START))
+    if (error_checking(2 == argc, ARGOMENT, 0))
     {
         fprintf(stderr, "%s <port>'\n", argv[0]);
         exit(1);
@@ -40,7 +39,10 @@ int main(int argc, char *argv[])
     simpleSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     // verifica creazione socket
-    error_checking(simpleSocket != -1, SOCKETCR);
+    if (error_checking(simpleSocket != -1, SOCKETCR, 0))
+    {
+        exit(1);
+    }
 
     /* retrieve the port number for listening */
     simplePort = atoi(argv[1]);
@@ -56,7 +58,7 @@ int main(int argc, char *argv[])
     returnStatus = bind(simpleSocket,(struct sockaddr *)&simpleServer,sizeof(simpleServer));
 
     // verifica bind
-    if (error_checking(returnStatus == 0, BINDADRS))
+    if (error_checking(returnStatus == 0, BINDADRS, 0))
     {
         close(simpleSocket);
         exit(1);
@@ -66,7 +68,7 @@ int main(int argc, char *argv[])
     returnStatus = listen(simpleSocket, 5);
 
     // verifica socket
-    if (error_checking(returnStatus != -1, SOCKETLS))
+    if (error_checking(returnStatus != -1, SOCKETLS, 0))
     {
         close(simpleSocket);
         exit(1);
@@ -76,14 +78,14 @@ int main(int argc, char *argv[])
     {
         struct sockaddr_in clientName = { 0 };
         int simpleChildSocket = 0;
-        int clientNameLength = sizeof(clientName);
+        clientNameLength = sizeof(clientName);
 
         /* wait here */
 
         simpleChildSocket = accept(simpleSocket,(struct sockaddr *)&clientName, &clientNameLength);
 
         // verfica se e' stata accettata la connessione
-        if(error_checking(simpleChildSocket != -1, CONNECTA))
+        if (error_checking(simpleChildSocket != -1, CONNECTA, simpleChildSocket))
         {
             close(simpleSocket);
             exit(1);
@@ -99,53 +101,70 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-int error_checking(int outcome, int type)
+int error_checking(int outcome, int type, int simpleChildSocket)
 {
+    // lunghezza massima di 512 caratteri
+    char buffer[MAX_CHAR];
+
     // identifica l’esito positivo o negativo del messaggio e può assumere i valori OK ed ERR
     if (outcome)
     {
-        fprintf(stderr , "OK ");
         // identifica il comando al quale la risposta fa riferimento, o la categoria di risposta.
         switch (type)
         {
-            case START:
-                fprintf(stderr, "START 'Welcome'\n");
-                return 0;
+            case ARGOMENT:
+                strcpy(buffer, "OK ARGOMENT 'Correct argument'\n");
+                break;
             case SOCKETCR:
-                fprintf(stderr, "SOCKETCR 'Socket created!'\n");
-                return 0;
+                strcpy(buffer, "OK SOCKETCR 'Socket created!'\n");
+                break;
             case BINDADRS:
-                fprintf(stderr, "BINDADRS 'Bind completed!'\n");
-                return 0;
+                strcpy(buffer, "OK BINDADRS 'Bind completed!'\n");
+                break;
             case SOCKETLS:
-                fprintf(stderr, "SOCKETLS 'Can listen on socket!'\n");
-                return 0;
+                strcpy(buffer, "OK SOCKETLS 'Can listen on socket!'\n");
+                break;
             case CONNECTA:
-                fprintf(stderr, "CONNECTA 'Connection accepted!'\n");
-                return 0;
+                fprintf(stderr, "OK CONNECTA 'Connection accepted!'\n");  // Non viene visualizzato dal client
+                strcpy(buffer, "OK START 'Welcome!'\n");
+                break;
         }
     }
     else
     {
-        fprintf(stderr , "ERR ");
         // identifica il comando al quale la risposta fa riferimento, o la categoria di risposta.
         switch (type)
         {
-            case START:
-                fprintf(stderr, "START 'Usage: ");
-                return 1;
+            case ARGOMENT:
+                strcpy(buffer, "ERR ARGOMENT 'Usage: ");
+                break;
             case SOCKETCR:
-                fprintf(stderr, "SOCKETCR 'Could not create a socket!'\n");
-                return 1;
+                strcpy(buffer, "ERR SOCKETCR 'Could not create a socket!'\n");
+                break;
             case BINDADRS:
-                fprintf(stderr, "BINDADRS 'Could not bind to address!'\n");
-                return 1;
+                strcpy(buffer, "ERR BINDADRS 'Could not bind to address!'\n");
+                break;
             case SOCKETLS:
-                fprintf(stderr, "SOCKETLS 'Cannot listen on socket!'\n");
-                return 1;
+                strcpy(buffer, "ERR SOCKETLS 'Cannot listen on socket!'\n");
+                break;
             case CONNECTA:
-                fprintf(stderr, "CONNECTA 'Cannot accept connections!'\n");
-                return 1;
+                strcpy(buffer, "ERR CONNECTA 'Cannot accept connections!'\n");
+                break;
         }
     }
+
+    // verifivo se può essere inviato anche al client
+    if (simpleChildSocket == 0)
+    {
+        fprintf(stderr, "%s", buffer);
+    }
+    else
+    {
+        fprintf(stderr, "%s", buffer);
+        // invia un messaggio al client
+        write(simpleChildSocket, buffer, strlen(buffer));
+    }
+    // input di chiusura del programma
+    outcome = !outcome;
+    return outcome;
 }
