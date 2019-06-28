@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 
         /* handle the new connection request  */
         /* write out our message to the client */
-        write(simpleChildSocket, MESSAGE, strlen(MESSAGE));
+        //write(simpleChildSocket, MESSAGE, strlen(MESSAGE));
         close(simpleChildSocket);
     }
 
@@ -105,53 +105,59 @@ int error_checking(int outcome, int type, int simpleChildSocket)
 {
     // lunghezza massima di 512 caratteri
     char buffer[MAX_CHAR];
+    char err[] = "ERR ";
+    char ok[] = "OK ";
 
     // identifica l’esito positivo o negativo del messaggio e può assumere i valori OK ed ERR
     if (outcome)
     {
+        strcpy(buffer, ok);
         // identifica il comando al quale la risposta fa riferimento, o la categoria di risposta.
         switch (type)
         {
             case ARGOMENT:
-                strcpy(buffer, "OK ARGOMENT 'Correct argument'\n");
+                strcat(buffer, "ARGOMENT 'Correct argument'");
                 break;
             case SOCKETCR:
-                strcpy(buffer, "OK SOCKETCR 'Socket created!'\n");
+                strcat(buffer, "SOCKETCR 'Socket created!'");
                 break;
             case BINDADRS:
-                strcpy(buffer, "OK BINDADRS 'Bind completed!'\n");
+                strcat(buffer, "BINDADRS 'Bind completed!'");
                 break;
             case SOCKETLS:
-                strcpy(buffer, "OK SOCKETLS 'Can listen on socket!'\n");
+                strcat(buffer, "SOCKETLS 'Can listen on socket!'");
                 break;
             case CONNECTA:
                 fprintf(stderr, "OK CONNECTA 'Connection accepted!'\n");  // Non viene visualizzato dal client
-                strcpy(buffer, "OK START 'Welcome!'\n");
+                strcat(buffer, "START 'Welcome!'");
                 break;
         }
     }
     else
     {
+        strcpy(buffer, err);
         // identifica il comando al quale la risposta fa riferimento, o la categoria di risposta.
         switch (type)
         {
             case ARGOMENT:
-                strcpy(buffer, "ERR ARGOMENT 'Usage: ");
-                break;
+                strcat(buffer, "ARGOMENT 'Usage: ");
+                fprintf(stderr, "%s", buffer);
+                return !outcome;
             case SOCKETCR:
-                strcpy(buffer, "ERR SOCKETCR 'Could not create a socket!'\n");
+                strcat(buffer, "SOCKETCR 'Could not create a socket!'");
                 break;
             case BINDADRS:
-                strcpy(buffer, "ERR BINDADRS 'Could not bind to address!'\n");
+                strcat(buffer, "BINDADRS 'Could not bind to address!'");
                 break;
             case SOCKETLS:
-                strcpy(buffer, "ERR SOCKETLS 'Cannot listen on socket!'\n");
+                strcat(buffer, "SOCKETLS 'Cannot listen on socket!'");
                 break;
             case CONNECTA:
-                strcpy(buffer, "ERR CONNECTA 'Cannot accept connections!'\n");
+                strcat(buffer, "CONNECTA 'Cannot accept connections!'");
                 break;
         }
     }
+    strcat(buffer, "\n");
 
     // verifivo se può essere inviato anche al client
     if (simpleChildSocket == 0)
@@ -165,6 +171,5 @@ int error_checking(int outcome, int type, int simpleChildSocket)
         write(simpleChildSocket, buffer, strlen(buffer));
     }
     // input di chiusura del programma
-    outcome = !outcome;
-    return outcome;
+    return !outcome;
 }
