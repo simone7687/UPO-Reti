@@ -7,6 +7,11 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
+#define MAX_CHAR 512
+
+// stampa solo il <MESSAGGIO> del messaggio ricevuto e controlla se il primo messaggio e' OK START <MESSAGGIO>. Se lo e' ritorna 1 altrimenti 0.
+int print_messages(char returnStatus[]);
+
 int main(int argc, char *argv[])
 {
     int simpleSocket = 0;
@@ -17,10 +22,8 @@ int main(int argc, char *argv[])
 
     if (3 != argc)
     {
-
         fprintf(stderr, "Usage: %s <server> <port>\n", argv[0]);
         exit(1);
-
     }
 
     /* create a streaming socket      */
@@ -30,7 +33,6 @@ int main(int argc, char *argv[])
     {
         fprintf(stderr, "Could not create a socket!\n");
         exit(1);
-
     }
     else
     {
@@ -68,7 +70,8 @@ int main(int argc, char *argv[])
 
     if ( returnStatus > 0 )
     {
-        printf("%d: %s", returnStatus, buffer);
+        //printf("%d: %s", returnStatus, buffer);
+        print_messages(buffer);
     }
     else
     {
@@ -77,4 +80,38 @@ int main(int argc, char *argv[])
 
     close(simpleSocket);
     return 0;
+}
+
+int print_messages(char buffer[])
+{
+    char start[] = "OK START ";
+    int x = 1;  // per controllare se il primo messaggio e' OK START <MESSAGGIO>
+    int outcome;
+    char messages[MAX_CHAR];
+    int i, j, length = strlen(buffer);
+    
+    // controlla se il primo messaggio e' OK START
+    for(i = 0; i < strlen(start); i++)
+    {
+        if(buffer[i] != start[i])
+        {
+            x = 0;
+        }
+    }
+    if(x)
+    {
+        for (j = 0; i < length || buffer[i] != '\n'; j++)
+        {
+            messages[j] = buffer[i];
+            i++;
+        }
+    }
+    else
+    {
+        printf("IL SERVER NON MI HA DATO IL BENZENUTO :(\n");
+        return x;
+    }
+    
+    printf("%s", messages);
+    return x;
 }
