@@ -88,30 +88,22 @@ int print_messages(char buffer[])
     int x = 1;  // per controllare se il primo messaggio e' OK START <MESSAGGIO>
     int outcome;
     char messages[MAX_CHAR];
-    int i, j, length = strlen(buffer);
+    int i = 0, j, length = strlen(buffer);
     
     // controlla se il primo messaggio e' OK START
-    for(i = 0; i < strlen(start); i++)
-    {
-        if(buffer[i] != start[i])
-        {
-            x = 0;
-        }
-    }
-    if(x)
-    {
-        for (j = 0; i < length || buffer[i] != '\n'; j++)
-        {
-            messages[j] = buffer[i];
-            i++;
-        }
-    }
-    else
+    if(strncmp(start, buffer, strlen(start)) != 0)
     {
         printf("IL SERVER NON MI HA DATO IL BENZENUTO :(\n");
-        return x;
+        return 0;
     }
-    
+    // strcpy(messages, start);
+    for (j = 0; buffer[i] != '\n'; j++)
+    {
+        messages[j] = buffer[i];
+        i++;
+    }
+    strcat(messages, "\n");
+
     printf("%s", messages);
     return x;
 }
