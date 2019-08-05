@@ -6,20 +6,18 @@
 #include <string.h>
 #include <unistd.h> 
 
-#define MAX_CHAR 512
-// #define true 1
-// #define false 2
-//I tipi di messaggi
-#define ARGOMENT 45645
-#define SOCKETCR 76567
-#define BINDADRS 43654
-#define SOCKETLS 63473
-#define CONNECTA 47645
+#define MAX_CHAR 512    /* lunghezza massima */
+
+// I tipi di messaggi
+#define ARGOMENT 45645  /* argomenti */
+#define SOCKETCR 76567  /* creazione socket */
+#define BINDADRS 43654  /* bind address */
+#define SOCKETLS 63473  /* socket connesso */
+#define CONNECTA 47645  /* connesione accettata */
 
 const char MESSAGE[] = "Hello UPO student!\n";
 
-// invia messaggi di errore del server
-int error_checking(int outcome, int type, int simpleChildSocket);
+int error_checking(int outcome, int type, int simpleChildSocket);   /* Invia messaggi di errore del server #1 */
 
 int main(int argc, char *argv[])
 {
@@ -103,7 +101,7 @@ int main(int argc, char *argv[])
 
 int error_checking(int outcome, int type, int simpleChildSocket)
 {
-    // lunghezza massima di 512 caratteri
+    // lunghezza massima di 512 caratteri #1
     char buffer[MAX_CHAR];
     char err[] = "ERR ";
     char ok[] = "OK ";
