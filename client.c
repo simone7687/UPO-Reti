@@ -9,7 +9,7 @@
 
 #define MAX_CHAR 512    /* lunghezza massima */
 
-int print_messages(char returnStatus[]);    /* stampa il <MESSAGGIO> del messaggio ricevuto e controlla se il primo messaggio e' OK START <MESSAGGIO>. Se lo e' ritorna 1 altrimenti 0 #11 #12 */
+int print_messages(char returnStatus[]);    /* stampa il <MESSAGGIO> del messaggio ricevuto. Se il messaggio non ha errori sintattici ritorna 1 altrimenti 0 #11 #12 */
 char start[] = "OK START "; /* messaggio di benvento */
 
 int main(int argc, char *argv[])
@@ -75,9 +75,13 @@ int main(int argc, char *argv[])
         if(strncmp(start, buffer, strlen(start)) != 0)
         {
             printf("ERROR the server did not welcome me :(\n");
-            return 0;
+            exit(1);
         }
-        print_messages(buffer);
+        if (print_messages(buffer))
+        {
+            printf("ERROR syntax, the message must have this form:\n <outcode> <type> <content>\n");
+            exit(1);
+        }
     }
     else
     {
@@ -104,8 +108,7 @@ int print_messages(char buffer[])
         }
         else
         {
-            printf("ERROR the message does not have an outcode\n");
-            return 0;
+            return 1;
         }
         while (buffer[i] == ' ')    // salta gli spazzi
         {
@@ -122,25 +125,26 @@ int print_messages(char buffer[])
         }
         if (buffer[i] == '\0' || buffer[i] == '\n')
         {
-            printf("ERROR the message must have a type and a content\n");
-            return 0;
+            return 1;
         }
         // content
         while (buffer[i] != '\0' && buffer[i] != '\n')
         {
             if (i >= MAX_CHAR)
             {
-                printf("ERROR the message is too long");
-                return 0;
+                printf("ERROR the message is too long\n");
+                exit(1);
             }
             printf("%c", buffer[i]);
             i++;
         }
         if (buffer[i] != '\n')
         {
-            printf("ERROR message does not end with a new line");
+            printf("\nERROR message does not end with a new line\n");
+            exit(1);
         }
         printf("\n");
         i++;
+        return 0;
     }
 }
