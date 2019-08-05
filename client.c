@@ -75,12 +75,16 @@ int main(int argc, char *argv[])
         if(strncmp(start, buffer, strlen(start)) != 0)
         {
             printf("ERROR the server did not welcome me :(\n");
-            exit(1);
         }
-        if (print_messages(buffer))
+        else
         {
-            printf("ERROR syntax, the message must have this form:\n <outcode> <type> <content>\n");
-            exit(1);
+            if (print_messages(buffer))
+            {
+                printf("ERROR syntax, the server message must have:\n - this form:\n   <outcode> <type> <content>\n - a maximum of 512 characters\n - a end with newline\n");
+            }
+            else
+            {
+            }
         }
     }
     else
@@ -132,19 +136,17 @@ int print_messages(char buffer[])
         {
             if (i >= MAX_CHAR)
             {
-                printf("ERROR the message is too long\n");
-                exit(1);
+                return 1;
             }
             printf("%c", buffer[i]);
             i++;
         }
         if (buffer[i] != '\n')
         {
-            printf("\nERROR message does not end with a new line\n");
-            exit(1);
+            return 1;
         }
         printf("\n");
         i++;
-        return 0;
     }
+    return 0;
 }
