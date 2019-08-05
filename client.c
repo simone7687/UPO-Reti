@@ -9,8 +9,8 @@
 
 #define MAX_CHAR 512
 
-// stampa solo il <MESSAGGIO> del messaggio ricevuto e controlla se il primo messaggio e' OK START <MESSAGGIO>. Se lo e' ritorna 1 altrimenti 0.
-int print_messages(char returnStatus[]);
+int print_messages(char returnStatus[]);    /* stampa il <MESSAGGIO> del messaggio ricevuto e controlla se il primo messaggio e' OK START <MESSAGGIO>. Se lo e' ritorna 1 altrimenti 0 #11 #12 */
+char start[] = "OK START "; /* messaggio di benvento */
 
 int main(int argc, char *argv[])
 {
@@ -84,26 +84,48 @@ int main(int argc, char *argv[])
 
 int print_messages(char buffer[])
 {
-    char start[] = "OK START ";
-    int x = 1;  // per controllare se il primo messaggio e' OK START <MESSAGGIO>
-    int outcome;
-    char messages[MAX_CHAR];
-    int i = 0, j, length = strlen(buffer);
-    
-    // controlla se il primo messaggio e' OK START
-    if(strncmp(start, buffer, strlen(start)) != 0)
+    int i = 0;
+    while (buffer[i] != '\0')
     {
-        printf("IL SERVER NON MI HA DATO IL BENZENUTO :(\n");
-        return 0;
-    }
-    // strcpy(messages, start);
-    for (j = 0; buffer[i] != '\n'; j++)
-    {
-        messages[j] = buffer[i];
+        // outcode
+        if(buffer[i] == 'O' && buffer[i+1] == 'K' && buffer[i+2] == ' ')
+        {
+            i += 2;
+        }
+        else if(buffer[i] == 'E' && buffer[i+1] == 'R' && buffer[i+2] == 'R' && buffer[i+3] == ' ')
+        {
+            i += 3;
+        }
+        else
+        {
+            printf("ERROR the message does not have an outcode\n");
+            return 0;
+        }
+        while (buffer[i] == ' ')    // salta gli spazzi
+        {
+            i++;
+        }
+        // type
+        while (buffer[i] != ' ' && buffer[i] != '\0')
+        {
+            i++;
+        }
+        while (buffer[i] == ' ')    // salta gli spazzi
+        {
+            i++;
+        }
+        if (buffer[i] == '\0' || buffer[i] == '\n')
+        {
+            printf("ERROR the message must have a type and a content\n");
+            return 0;
+        }
+        // content
+        while (buffer[i] != '\0' && buffer[i] != '\n')
+        {
+            printf("%c", buffer[i]);
+            i++;
+        }
+        printf("\n");
         i++;
     }
-    strcat(messages, "\n");
-
-    printf("%s", messages);
-    return x;
 }
