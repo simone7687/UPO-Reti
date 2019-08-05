@@ -125,6 +125,7 @@ int error_checking(int outcome, int type, int simpleChildSocket)
             case SOCKETLS:
                 strcat(buffer, "SOCKETLS 'Can listen on socket!'");
                 break;
+            // All’apertura della connessione il server manda un messaggio di benvenuto (server) #2
             case CONNECTA:
                 fprintf(stderr, "OK CONNECTA 'Connection accepted!'\n");  // Non viene visualizzato dal client
                 strcat(buffer, "START 'Welcome!'");
