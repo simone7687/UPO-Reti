@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
-#define MAX_CHAR 512
+#define MAX_CHAR 512    /* lunghezza massima */
 
 int print_messages(char returnStatus[]);    /* stampa il <MESSAGGIO> del messaggio ricevuto e controlla se il primo messaggio e' OK START <MESSAGGIO>. Se lo e' ritorna 1 altrimenti 0 #11 #12 */
 char start[] = "OK START "; /* messaggio di benvento */
@@ -71,6 +71,12 @@ int main(int argc, char *argv[])
     if ( returnStatus > 0 )
     {
         //printf("%d: %s", returnStatus, buffer);
+        // controlla se il primo messaggio e' OK START #12
+        if(strncmp(start, buffer, strlen(start)) != 0)
+        {
+            printf("ERROR the server did not welcome me :(\n");
+            return 0;
+        }
         print_messages(buffer);
     }
     else
@@ -122,8 +128,17 @@ int print_messages(char buffer[])
         // content
         while (buffer[i] != '\0' && buffer[i] != '\n')
         {
+            if (i >= MAX_CHAR)
+            {
+                printf("ERROR the message is too long");
+                return 0;
+            }
             printf("%c", buffer[i]);
             i++;
+        }
+        if (buffer[i] != '\n')
+        {
+            printf("ERROR message does not end with a new line");
         }
         printf("\n");
         i++;
