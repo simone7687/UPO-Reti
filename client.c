@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 
     if (3 != argc)
     {
-        fprintf(stderr, "Usage: %s <server> <port>\n", argv[0]);
+        printf(stderr, "Usage: %s <server> <port>\n", argv[0]);
         exit(1);
     }
 
@@ -74,13 +74,13 @@ int main(int argc, char *argv[])
         // controlla se il primo messaggio e' OK START #12
         if(strncmp(start, buffer, strlen(start)) != 0)
         {
-            printf("ERROR the server did not welcome me :(\n");
+            fprintf(stderr, "ERROR the server did not welcome me :(\n");
         }
         else
         {
             if (print_messages(buffer))
             {
-                printf("ERROR syntax, the server message must have:\n - this form:\n   <outcode> <type> <content>\n - a maximum of 512 characters\n - a end with newline\n");
+                fprintf(stderr, "ERROR syntax, the server message must have:\n - this form:\n   <outcode> <type> <content>\n - a maximum of 512 characters\n - a end with newline\n");
             }
             else
             {
@@ -138,14 +138,14 @@ int print_messages(char buffer[])
             {
                 return 1;
             }
-            printf("%c", buffer[i]);
+            fprintf(stderr, "%c", buffer[i]);
             i++;
         }
         if (buffer[i] != '\n')
         {
             return 1;
         }
-        printf("\n");
+        fprintf(stderr, "\n");
         i++;
     }
     return 0;
