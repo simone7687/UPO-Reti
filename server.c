@@ -15,9 +15,15 @@
 #define SOCKETLS 63473  /* socket connesso */
 #define CONNECTA 47645  /* connesione accettata */
 
+#define TEXT 5466
+#define HIST 4664
+#define EXIT 4576
+#define QUIT 4575
+
 const char MESSAGE[] = "Hello UPO student!\n";
 
 int error_checking(int outcome, int type, int simpleChildSocket);   /* Invia messaggi di errore del server #1 */
+void client_waiting(int sockfd);    /* Il server si pone in attesa di un messaggio di comando #4 */
 
 int main(int argc, char *argv[])
 {
@@ -72,7 +78,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    while (1)
+    //while (1)
     {
         struct sockaddr_in clientName = { 0 };
         int simpleChildSocket = 0;
@@ -89,10 +95,11 @@ int main(int argc, char *argv[])
             exit(1);
         }
 
+        client_waiting(simpleChildSocket);
         /* handle the new connection request  */
         /* write out our message to the client */
         //write(simpleChildSocket, MESSAGE, strlen(MESSAGE));
-        close(simpleChildSocket);
+        // close(simpleChildSocket);
     }
 
     close(simpleSocket);
@@ -172,3 +179,50 @@ int error_checking(int outcome, int type, int simpleChildSocket)
     // input di chiusura del programma
     return !outcome;
 }
+int controlcommand(char buffer[])   /* Controlla la corratterza del comando */
+{
+    if (strncmp(buffer, "TEXT ", 5) == 0)
+    {return TEXT;}
+    else if (strncmp(buffer, "HIST ", 5) == 0)
+    {return HIST;}
+    else if (strncmp(buffer, "EXIT ", 5) == 0)
+    {return EXIT;}
+    else if (strncmp(buffer, "QUIT ", 5) == 0)
+    {return QUIT;}
+    // In caso il comando non fosse riconosciuto, ritorna 0
+    return 0;
+}
+
+void client_waiting(int simpleChildSocket)
+{
+    int i = 1;
+    char buffer[MAX_CHAR];
+    int returnStatus = 0;
+    while (1)
+    {
+        // Una volta eseguita un'operazione, svuoto il buffer per le operazioni successive o per le connessioni successive
+        memset(&buffer, '\0', sizeof(buffer));
+        returnStatus = read(simpleChildSocket, buffer, sizeof(buffer)); // Ricevo il messaggio del client
+        if (returnStatus > 0)   // Nel caso abbia ricevuto qualcosa svolgo le operazioni successive
+        {
+            printf("MESSAGGIO RICEVUTO:  %s\n", buffer);
+            i = controlcommand(buffer);
+            switch (i)
+            {
+                case TEXT:
+                    break;
+                case HIST:
+                    break;
+                case EXIT:
+                    break;
+                case QUIT:
+                    break;
+                default:
+                    break;
+            }
+        }
+        else 
+        {
+        }
+    }
+} 
