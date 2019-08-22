@@ -14,6 +14,7 @@
 #define BINDADRS 43654  /* bind address */
 #define SOCKETLS 63473  /* socket connesso */
 #define CONNECTA 47645  /* connesione accettata */
+#define ERRSYNTX 75648  /* sintassi */
 
 #define TEXT 5466
 #define HIST 4664
@@ -137,6 +138,9 @@ int error_checking(int outcome, int type, int simpleChildSocket)
                 fprintf(stderr, "OK CONNECTA 'Connection accepted!'\n");  // Non viene visualizzato dal client
                 strcat(buffer, "START 'Welcome!'");
                 break;
+            case ERRSYNTX:
+                strcat(buffer, "SYNTAX 'Correct syntax!'");
+                break;
         }
     }
     else
@@ -161,6 +165,9 @@ int error_checking(int outcome, int type, int simpleChildSocket)
             case CONNECTA:
                 strcat(buffer, "CONNECTA 'Cannot accept connections!'");
                 break;
+            case ERRSYNTX:
+                strcat(buffer, "SYNTAX 'Incorrect syntax!'");
+                break;
         }
     }
     strcat(buffer, "\n");
@@ -180,7 +187,7 @@ int error_checking(int outcome, int type, int simpleChildSocket)
     return !outcome;
 }
 
-int controlcommand(char buffer[])   /* Controlla la corratterza del comando */
+int controlcommand(char buffer[])   /* Correttezza dei messaggi ricevuti #7 */
 {
     if (strncmp(buffer, "TEXT ", 5) == 0)
     {return TEXT;}
@@ -221,6 +228,7 @@ void client_waiting(int simpleChildSocket)
                 default:
                     break;
             }
+            error_checking(i, ERRSYNTX, simpleChildSocket);
         }
         else 
         {
