@@ -179,6 +179,7 @@ int error_checking(int outcome, int type, int simpleChildSocket)
     // input di chiusura del programma
     return !outcome;
 }
+
 int controlcommand(char buffer[])   /* Controlla la corratterza del comando */
 {
     if (strncmp(buffer, "TEXT ", 5) == 0)
