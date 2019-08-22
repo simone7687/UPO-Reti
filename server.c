@@ -206,7 +206,7 @@ void client_waiting(int simpleChildSocket)
         returnStatus = read(simpleChildSocket, buffer, sizeof(buffer)); // Ricevo il messaggio del client
         if (returnStatus > 0)   // Nel caso abbia ricevuto qualcosa svolgo le operazioni successive
         {
-            printf("MESSAGGIO RICEVUTO:  %s\n", buffer);
+            fprintf("MESSAGGIO RICEVUTO:  %s\n", buffer);
             i = controlcommand(buffer);
             switch (i)
             {
