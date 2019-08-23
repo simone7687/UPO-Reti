@@ -215,8 +215,6 @@ int execute_command(int simpleSocket)
     {printf("Riprova\n"); return 1;}
     memset(&buffer, '\0', sizeof(buffer));
 
-
-
     while (1)
     {
         returnStatus = read(simpleSocket, buffer, sizeof(buffer));
@@ -229,9 +227,6 @@ int execute_command(int simpleSocket)
         }
     }
     memset(&buffer, '\0', sizeof(buffer));
-
-
-
 
     return 1;
 }
