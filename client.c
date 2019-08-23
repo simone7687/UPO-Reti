@@ -215,5 +215,23 @@ int execute_command(int simpleSocket)
     {printf("Riprova\n"); return 1;}
     memset(&buffer, '\0', sizeof(buffer));
 
+
+
+    while (1)
+    {
+        returnStatus = read(simpleSocket, buffer, sizeof(buffer));
+        if (returnStatus > 0)
+        {
+            if(strncmp(buffer, "OK ", 3) == 0)
+            {break;}
+            else
+            {print_messages(buffer);return 0;}
+        }
+    }
+    memset(&buffer, '\0', sizeof(buffer));
+
+
+
+
     return 1;
 }
