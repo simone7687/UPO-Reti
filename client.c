@@ -230,10 +230,6 @@ int execute_command(int simpleSocket)
     }
     
     if (strncmp(buffer, "TEXT ", 5) == 0)
-    else if (strncmp(buffer, "HIST ", 5) == 0)
-    {}
-    else if (strncmp(buffer, "EXIT ", 5) == 0)
-    {}
     {if(text(simpleSocket)) {return 0;}}
     else if (strncmp(buffer, "QUIT ", 5) == 0)
     {}
