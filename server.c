@@ -218,7 +218,7 @@ int controltext(int simpleChildSocket, char buffer[])   /* contrlla il comando T
     m[figures] = '\0';
     count = atoi(m);
     // conta i caratteri
-    for (int i = 5; i < (MAX_CHAR-figures) && buffer[i] != '\n' && buffer[i] != '\0'; i++)
+    for (int i = 5; i < (MAX_CHAR) && buffer[i] != '\n' && buffer[i] != '\0'; i++)
     {
         if (buffer[i] != ' ') {count2++;}
     }
@@ -239,10 +239,10 @@ int controltext(int simpleChildSocket, char buffer[])   /* contrlla il comando T
         strcpy(buffer, "ERR TEXT 'The characters counted by the client(");
         sprintf(n, "%d", count);
         strcat(buffer, n);
-        strcpy(buffer, ") are different from the characters of the server(");
+        strcat(buffer, ") are different from the characters of the server(");
         sprintf(n, "%d", count2);
         strcat(buffer, n);
-        strcpy(buffer, ")'\n");
+        strcat(buffer, ")'\n");
         fprintf(stderr, "%s", buffer); 
         return 1;
     }
