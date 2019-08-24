@@ -159,14 +159,32 @@ int print_messages(char buffer[])
     return 0;
 }
 
-void text(int simpleSocket)  /* Inserimento del testo #14  */
+int error_checking(int simpleSocket)    /* aspetta un messaggio del servre e controlla se questo è di errore (return 1 se ha un errore) */
+{
+    int i;
+    char buffer[MAX_CHAR];
+    while (1)
+    {
+        i = read(simpleSocket, buffer, sizeof(buffer));
+        if (i > 0)
+        {
+            if(strncmp(buffer, "OK ", 3) == 0)
+            {return 0;}
+            else
+            {print_messages(buffer);return 1;}
+        }
+    }
+}
+
+int text(int simpleSocket)  /* Inserimento del testo #14  (return 1 se ha un errore)*/
 {
     char buffer[MAX_CHAR] = "TEXT ";
     int ch, i = 5;
     int cifre = 5+4+1;  // 5 per text, 4 per i numei e 1 per \n
     int caratteri = 0;
     char char_caratteri[4];
-    while(i < MAX_CHAR-cifre)
+    // conta caratteri
+    while(i < MAX_CHAR-cifre+5)
     {
         if ((ch = getchar()) != '\n' && ch != EOF)
         {
@@ -178,6 +196,7 @@ void text(int simpleSocket)  /* Inserimento del testo #14  */
         {break;}
     }
     buffer[i] = '\0';
+    // invia messaggio
     if(buffer[0] != '\0' && buffer[0] != '\n')
     {
         strcat(buffer, " ");
@@ -186,8 +205,15 @@ void text(int simpleSocket)  /* Inserimento del testo #14  */
         strcat(buffer, "\n");
         write(simpleSocket, buffer, strlen(buffer)); 
         memset(&buffer, '\0', sizeof(buffer));
-        if(i >= MAX_CHAR-cifre)
-        {text(simpleSocket);}
+        if(i >= MAX_CHAR-cifre) // se il messaggio è troppo grande
+        {if(text(simpleSocket)) {return 1;}}
+    }
+    // controlla risposta del server
+    if(!error_checking(simpleSocket))
+    {return error_checking(simpleSocket);}
+    else
+    {return 1;}
+}
     }
 }
 
@@ -204,28 +230,16 @@ int execute_command(int simpleSocket)
     }
     
     if (strncmp(buffer, "TEXT ", 5) == 0)
-    {text(simpleSocket);}
     else if (strncmp(buffer, "HIST ", 5) == 0)
     {}
     else if (strncmp(buffer, "EXIT ", 5) == 0)
     {}
+    {if(text(simpleSocket)) {return 0;}}
     else if (strncmp(buffer, "QUIT ", 5) == 0)
     {}
     else
     {printf("Riprova\n"); return 1;}
-    memset(&buffer, '\0', sizeof(buffer));
 
-    while (1)
-    {
-        returnStatus = read(simpleSocket, buffer, sizeof(buffer));
-        if (returnStatus > 0)
-        {
-            if(strncmp(buffer, "OK ", 3) == 0)
-            {break;}
-            else
-            {print_messages(buffer);return 0;}
-        }
-    }
     memset(&buffer, '\0', sizeof(buffer));
 
     return 1;
