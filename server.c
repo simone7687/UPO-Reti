@@ -236,10 +236,10 @@ int controltext(int simpleChildSocket, char buffer[])   /* contrlla il comando T
     }
     else
     {
-        strcpy(buffer, "ERR TEXT 'I caratteri contati dal client(");
+        strcpy(buffer, "ERR TEXT 'The characters counted by the client(");
         sprintf(n, "%d", count);
         strcat(buffer, n);
-        strcpy(buffer, ") sono diversi da quelli del server(");
+        strcpy(buffer, ") are different from the characters of the server(");
         sprintf(n, "%d", count2);
         strcat(buffer, n);
         strcpy(buffer, ")'\n");
