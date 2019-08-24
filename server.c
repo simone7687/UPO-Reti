@@ -203,19 +203,18 @@ int controlcommand(char buffer[])   /* Correttezza dei messaggi ricevuti #7 */
 
 void client_waiting(int simpleChildSocket)
 {
-    int i = 1;
     char buffer[MAX_CHAR];
     int returnStatus = 0;
     while (1)
     {
-        // Una volta eseguita un'operazione, svuoto il buffer per le operazioni successive o per le connessioni successive
         memset(&buffer, '\0', sizeof(buffer));
         returnStatus = read(simpleChildSocket, buffer, sizeof(buffer)); // Ricevo il messaggio del client
         if (returnStatus > 0)   // Nel caso abbia ricevuto qualcosa svolgo le operazioni successive
         {
-            fprintf(stderr, "MESSAGGIO RICEVUTO:  %s\n", buffer);
-            i = controlcommand(buffer);
-            switch (i)
+            fprintf(stderr, "%s", buffer);
+            returnStatus = controlcommand(buffer);
+            error_checking(returnStatus, ERRSYNTX, simpleChildSocket);
+            switch (returnStatus)
             {
                 case TEXT:
                     break;
@@ -228,7 +227,6 @@ void client_waiting(int simpleChildSocket)
                 default:
                     break;
             }
-            error_checking(i, ERRSYNTX, simpleChildSocket);
         }
         else 
         {
