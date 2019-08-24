@@ -79,7 +79,8 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    //while (1)
+    int x = 1;
+    while (x)
     {
         struct sockaddr_in clientName = { 0 };
         int simpleChildSocket = 0;
@@ -96,11 +97,9 @@ int main(int argc, char *argv[])
             exit(1);
         }
 
-        client_waiting(simpleChildSocket);
+        x = client_waiting(simpleChildSocket);
         /* handle the new connection request  */
         /* write out our message to the client */
-        //write(simpleChildSocket, MESSAGE, strlen(MESSAGE));
-        // close(simpleChildSocket);
     }
 
     close(simpleSocket);
@@ -202,6 +201,53 @@ int controlcommand(char buffer[])   /* Correttezza dei messaggi ricevuti #7 */
 }
 
 void client_waiting(int simpleChildSocket)
+int controltext(int simpleChildSocket, char buffer[])   /* contrlla il comando TEXT #8 (ritorna 1 se è sbagliato)*/
+{
+    int count=0, count2 = 0, figures = -1;
+    char n[10], m[10];
+    // copia le cifre al contrario
+    for (int i = strlen(buffer)-1; buffer[i] != ' ' && buffer[i] != '\0'; i--, figures++)
+    {
+        n[figures] = buffer[i];
+    }
+    // riordina le cife
+    for (int i = 0, k = figures; k != -1; i++, k--)
+    {
+        m[i] = n[k-1];
+    }
+    m[figures] = '\0';
+    count = atoi(m);
+    // conta i caratteri
+    for (int i = 5; i < (MAX_CHAR-figures) && buffer[i] != '\n' && buffer[i] != '\0'; i++)
+    {
+        if (buffer[i] != ' ') {count2++;}
+    }
+    // invia un messagio al client
+    count2 = count2 - figures;
+    if(count2 == count)
+    {
+        strcpy(buffer, "OK TEXT ");
+        sprintf(n, "%d", count2);
+        strcat(buffer, n);
+        strcat(buffer, "\n");
+        write(simpleChildSocket, buffer, strlen(buffer));
+        fprintf(stderr, "%s", buffer); 
+        return 0;
+    }
+    else
+    {
+        strcpy(buffer, "ERR TEXT 'I caratteri contati dal client(");
+        sprintf(n, "%d", count);
+        strcat(buffer, n);
+        strcpy(buffer, ") sono diversi da quelli del server(");
+        sprintf(n, "%d", count2);
+        strcat(buffer, n);
+        strcpy(buffer, ")'\n");
+        fprintf(stderr, "%s", buffer); 
+        return 1;
+    }
+}
+
 {
     char buffer[MAX_CHAR];
     int returnStatus = 0;
@@ -217,6 +263,7 @@ void client_waiting(int simpleChildSocket)
             switch (returnStatus)
             {
                 case TEXT:
+                    if (controltext(simpleChildSocket, buffer)) {return 0;}
                     break;
                 case HIST:
                     break;
@@ -224,12 +271,10 @@ void client_waiting(int simpleChildSocket)
                     break;
                 case QUIT:
                     break;
-                default:
+                case 0:
+                    return 0;
                     break;
             }
-        }
-        else 
-        {
         }
     }
 } 
