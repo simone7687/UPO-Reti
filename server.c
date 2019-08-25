@@ -22,6 +22,17 @@
 #define QUIT 4575
 
 const char MESSAGE[] = "Hello UPO student!\n";
+// lista
+struct node
+{
+    char alphanumber;
+    int counter;
+    struct node *next;
+};
+typedef struct node element;
+typedef element *list;
+list newnode() {return malloc(sizeof(element));}
+void deleteList(list* head_ref); /* Function to delete the entire linked list */
 
 int error_checking(int outcome, int type, int simpleChildSocket);   /* Invia messaggi di errore del server #1 */
 void client_waiting(int sockfd);    /* Il server si pone in attesa di un messaggio di comando #4 */
@@ -190,7 +201,7 @@ int controlcommand(char buffer[])   /* Correttezza dei messaggi ricevuti #7 */
 {
     if (strncmp(buffer, "TEXT ", 5) == 0)
     {return TEXT;}
-    else if (strncmp(buffer, "HIST ", 5) == 0)
+    else if (strncmp(buffer, "HIST", 4) == 0)
     {return HIST;}
     else if (strncmp(buffer, "EXIT ", 5) == 0)
     {return EXIT;}
@@ -200,7 +211,6 @@ int controlcommand(char buffer[])   /* Correttezza dei messaggi ricevuti #7 */
     return 0;
 }
 
-void client_waiting(int simpleChildSocket)
 int controltext(int simpleChildSocket, char buffer[])   /* contrlla il comando TEXT #8 (ritorna 1 se è sbagliato)*/
 {
     int count=0, count2 = 0, figures = -1;
@@ -222,8 +232,48 @@ int controltext(int simpleChildSocket, char buffer[])   /* contrlla il comando T
     {
         if (buffer[i] != ' ') {count2++;}
     }
-    // invia un messagio al client
     count2 = count2 - figures;
+
+    // serve per HIST #5
+    list head = l;
+    for (int i = 5, k = count2; i < (MAX_CHAR) && buffer[i] != '\n' && buffer[i] != '\0' && k != 0; i++, k--)
+    {
+        if (buffer[i] != ' ')
+        {
+            l = head;
+            int y = 1;
+            while(y)
+            {
+                if (l->alphanumber == buffer[i])
+                {
+                    l->counter++;
+                    y=0;
+                }
+                else if (l->alphanumber == '\0')
+                {
+                    l->alphanumber = buffer[i];
+                    l->counter = 1;
+                    y=0;
+                }
+                else if (l->next == NULL)
+                {
+                    l->next = newnode();
+                    l->next->next = NULL;
+                    l = l->next;
+                    l->alphanumber = buffer[i];
+                    l->counter = 1;
+                    y=0;
+                }
+                else
+                {
+                    l=l->next;
+                }
+            }
+        }
+    }
+
+    sleep(1);
+    // invia un messagio al client
     if(count2 == count)
     {
         strcpy(buffer, "OK TEXT ");
@@ -243,14 +293,60 @@ int controltext(int simpleChildSocket, char buffer[])   /* contrlla il comando T
         sprintf(n, "%d", count2);
         strcat(buffer, n);
         strcat(buffer, ")'\n");
+        write(simpleChildSocket, buffer, strlen(buffer));
         fprintf(stderr, "%s", buffer); 
         return 1;
     }
 }
 
+int hist(element* l, int simpleChildSocket) /* il comando HIST #8 (ritorna 1 se è sbagliato)*/
+{
+	char c[5], buffer[512];
+    list head = l;
+	if (l != NULL)
+	{
+        l = head;
+        while(1)
+        {
+            sleep(1);
+            memset(&buffer, '\0', sizeof(buffer));
+            strcat(buffer, "OK HIST ");
+            for (int i = 0; i < 7; i++)
+            {
+                memset(&c, '\0', sizeof(c));
+                c[0] = l->alphanumber;
+                strcat(buffer, c);
+                strcat(buffer, ":");
+                sprintf(c, "%d", l->counter);
+                strcat(buffer, c);
+                strcat(buffer, " ");
+                if (l->next != NULL)
+                {l=l->next;}
+                else
+                {break;}
+            }
+            strcat(buffer, "\n");
+            write(simpleChildSocket, buffer, strlen(buffer));
+            fprintf(stderr, "%s", buffer);
+            if (l->next == NULL)
+            {break;}
+        }
+	}
+    memset(&buffer, '\0', sizeof(buffer));
+	strcat(buffer, "OK HIST END\n");
+    write(simpleChildSocket, buffer, strlen(buffer));
+    fprintf(stderr, "%s", buffer);
+}
+
+int client_waiting(int simpleChildSocket)
 {
     char buffer[MAX_CHAR];
     int returnStatus = 0;
+    // inizializzo una lista
+    list head = newnode();
+    head->counter = 0;
+    list *l = &head;
+
     while (1)
     {
         memset(&buffer, '\0', sizeof(buffer));
@@ -263,18 +359,32 @@ int controltext(int simpleChildSocket, char buffer[])   /* contrlla il comando T
             switch (returnStatus)
             {
                 case TEXT:
-                    if (controltext(simpleChildSocket, buffer)) {return 0;}
+                    if (controltext(simpleChildSocket, buffer, *l)) {deleteList(l);return 0;}
                     break;
                 case HIST:
+                    hist(*l, simpleChildSocket);
                     break;
                 case EXIT:
                     break;
                 case QUIT:
                     break;
                 case 0:
-                    return 0;
+                    deleteList(l);return 0;
                     break;
             }
         }
     }
 } 
+
+void deleteList(list* head_ref) /* Elimina l'intera lista */
+{ 
+   list current = *head_ref; 
+   list next; 
+   while (current != NULL)  
+   { 
+       next = current->next; 
+       free(current); 
+       current = next; 
+   } 
+   *head_ref = NULL; 
+}
