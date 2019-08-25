@@ -246,6 +246,7 @@ int hist(int simpleSocket)  /* Analisi del testo #15  (return 1 se ha un errore)
 int execute_command(int simpleSocket)
 {
     char buffer[MAX_CHAR];
+    memset(&buffer, '\0', sizeof(buffer));
     int ch, returnStatus;
     for (int i = 0; i < 5; i++)
     {
