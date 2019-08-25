@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 
     if (3 != argc)
     {
-        printf(stderr, "Usage: %s <server> <port>\n", argv[0]);
+        fprintf(stderr, "Usage: %s <server> <port>\n", argv[0]);
         exit(1);
     }
 
