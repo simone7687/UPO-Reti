@@ -214,6 +214,31 @@ int text(int simpleSocket)  /* Inserimento del testo #14  (return 1 se ha un err
     else
     {return 1;}
 }
+
+int hist(int simpleSocket)  /* Analisi del testo #15  (return 1 se ha un errore)*/
+{
+    char buffer[MAX_CHAR];
+    int returnStatus;
+    // invia comando
+    strcat(buffer, "HIST\n");
+    write(simpleSocket, buffer, strlen(buffer));
+    // controlla sintassi
+    if (error_checking(simpleSocket))
+    {return 1;}
+    // riceve messaggio
+    while (1)
+    {
+        memset(&buffer, '\0', sizeof(buffer));
+        returnStatus = read(simpleSocket, buffer, sizeof(buffer));
+        if (returnStatus > 0)
+        {
+            if (strncmp(buffer, "OK HIST END", 11) == 0)
+            {return 0;}
+            else if (strncmp(buffer, "OK HIST ", 8) == 0)
+            {
+                print_messages(buffer);
+            }
+        }
     }
 }
 
@@ -231,6 +256,8 @@ int execute_command(int simpleSocket)
     
     if (strncmp(buffer, "TEXT ", 5) == 0)
     {if(text(simpleSocket)) {return 0;}}
+    else if (strncmp(buffer, "HIST", 4) == 0)
+    {if(hist(simpleSocket)) {return 0;}}
     else if (strncmp(buffer, "QUIT ", 5) == 0)
     {}
     else
