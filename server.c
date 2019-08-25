@@ -34,8 +34,8 @@ typedef element *list;
 list newnode() {return malloc(sizeof(element));}
 void deleteList(list* head_ref); /* Function to delete the entire linked list */
 
-int error_checking(int outcome, int type, int simpleChildSocket);   /* Invia messaggi di errore del server #1 */
-void client_waiting(int sockfd);    /* Il server si pone in attesa di un messaggio di comando #4 */
+int error_checking(int outcome, int type, int simpleChildSocket);   /* Invia messaggi di errore del server #1 (ritorna 1 per uscire dal programma)*/
+int client_waiting(int sockfd);    /* Il server si pone in attesa di un messaggio di comando #4 (ritorna 0 per concludere la connesione)*/
 
 int main(int argc, char *argv[])
 {
@@ -211,7 +211,7 @@ int controlcommand(char buffer[])   /* Correttezza dei messaggi ricevuti #7 */
     return 0;
 }
 
-int controltext(int simpleChildSocket, char buffer[])   /* contrlla il comando TEXT #8 (ritorna 1 se è sbagliato)*/
+int controltext(int simpleChildSocket, char buffer[], element* l)   /* contrlla il comando TEXT #8 (ritorna 1 se è sbagliato)*/
 {
     int count=0, count2 = 0, figures = -1;
     char n[10], m[10];
