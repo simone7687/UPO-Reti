@@ -260,8 +260,10 @@ int execute_command(int simpleSocket)
     {if(text(simpleSocket)) {return 0;}}
     else if (strncmp(buffer, "HIST", 4) == 0)
     {if(hist(simpleSocket)) {return 0;}}
-    else if (strncmp(buffer, "QUIT ", 5) == 0)
-    {}
+    else if (strncmp(buffer, "EXIT", 4) == 0)
+    {strcat(buffer, "\n"); write(simpleSocket, buffer, strlen(buffer));if(hist(simpleSocket)) {return 0;} return 0;}
+    else if (strncmp(buffer, "QUIT", 4) == 0)
+    {strcat(buffer, "\n"); write(simpleSocket, buffer, strlen(buffer));return 0;}
     else
     {printf("Riprova\n"); return 1;}
 
