@@ -220,6 +220,7 @@ int hist(int simpleSocket)  /* Analisi del testo #15  (return 1 se ha un errore)
     char buffer[MAX_CHAR];
     int returnStatus;
     // invia comando
+    memset(&buffer, '\0', sizeof(buffer));
     strcat(buffer, "HIST\n");
     write(simpleSocket, buffer, strlen(buffer));
     // controlla sintassi
