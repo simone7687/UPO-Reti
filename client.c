@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <ctype.h>
 
 #define MAX_CHAR 512    /* lunghezza massima */
 
@@ -190,7 +191,7 @@ int text(int simpleSocket)  /* Inserimento del testo #14  (return 1 se ha un err
         {
             buffer[i] = ch;
             i++;
-            if (ch != ' ') {caratteri++;}
+            if (isalnum(ch)) {caratteri++;}
         }
         else
         {break;}

@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h> 
+#include <ctype.h>
 
 #define MAX_CHAR 512    /* lunghezza massima */
 
@@ -239,7 +240,7 @@ int controltext(int simpleChildSocket, char buffer[], element* l)   /* contrlla 
     // conta i caratteri
     for (int i = 5; i < (MAX_CHAR) && buffer[i] != '\n' && buffer[i] != '\0'; i++)
     {
-        if (buffer[i] != ' ') {count2++;}
+        if (isalnum(buffer[i])) {count2++;}
     }
     count2 = count2 - figures;
 
@@ -247,7 +248,7 @@ int controltext(int simpleChildSocket, char buffer[], element* l)   /* contrlla 
     list head = l;
     for (int i = 5, k = count2; i < (MAX_CHAR) && buffer[i] != '\n' && buffer[i] != '\0' && k != 0; i++, k--)
     {
-        if (buffer[i] != ' ')
+        if (isalnum(buffer[i]))
         {
             l = head;
             int y = 1;
