@@ -151,6 +151,11 @@ int error_checking(int outcome, int type, int simpleChildSocket)
             case SYNT:
                 strcat(buffer, "SYNT 'Correct syntax!'");
                 break;
+            case QUIT:
+                strcat(buffer, "QUIT 'Connection closed'");//, wait another client'");
+                break;
+            case EXIT:
+                strcat(buffer, "EXIT 'Connection closed'");//, wait another client'");
                 break;
         }
     }
@@ -179,6 +184,8 @@ int error_checking(int outcome, int type, int simpleChildSocket)
             case SYNT:
                 strcat(buffer, "SYNT 'Incorrect syntax!'");
                 break;
+            case QUIT:
+                strcat(buffer, "QUIT 'Connection closed, end of the program'");
                 break;
         }
     }
@@ -205,9 +212,9 @@ int controlcommand(char buffer[])   /* Correttezza dei messaggi ricevuti #7 */
     {return TEXT;}
     else if (strncmp(buffer, "HIST", 4) == 0)
     {return HIST;}
-    else if (strncmp(buffer, "EXIT ", 5) == 0)
+    else if (strncmp(buffer, "EXIT", 4) == 0)
     {return EXIT;}
-    else if (strncmp(buffer, "QUIT ", 5) == 0)
+    else if (strncmp(buffer, "QUIT", 4) == 0)
     {return QUIT;}
     // In caso il comando non fosse riconosciuto, ritorna 0
     return 0;
@@ -360,15 +367,21 @@ int client_waiting(int simpleChildSocket)
             error_checking(returnStatus, SYNT, simpleChildSocket);
             switch (returnStatus)
             {
-                case TEXT:
-                    if (controltext(simpleChildSocket, buffer, *l)) {deleteList(l);return 0;}
+                case TEXT:  // se ha un errore nel TEXT li server termina
+                    if (controltext(simpleChildSocket, buffer, *l))
+                    {deleteList(l);return 0;}
                     break;
                 case HIST:
                     hist(*l, simpleChildSocket);
                     break;
-                case EXIT:
+                case EXIT:  // il server chiuse la connesione con il client e ne aspetta un altro
+                    hist(*l, simpleChildSocket);
+                    error_checking(1, EXIT, simpleChildSocket);
+                    deleteList(l);return 1;
                     break;
-                case QUIT:
+                case QUIT:  // il server chiuse la connesione con il client e ne aspetta un altro
+                    error_checking(1, QUIT, simpleChildSocket);
+                    deleteList(l);return 1;
                     break;
                 case 0:
                     deleteList(l);return 0;
