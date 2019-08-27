@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     }
 
     int x = 1;
-    while (x)
+    while (1)
     {
         struct sockaddr_in clientName = { 0 };
         int simpleChildSocket = 0;
