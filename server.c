@@ -14,7 +14,7 @@
 #define BIND 43654  /* bind address */
 #define SOLS 63473  /* socket connesso */
 #define CONT 47645  /* connesione accettata */
-#define SYNT 75648  /* sintassi */
+#define SYNTAX 75648  /* sintassi */
 
 #define TEXT 5466
 #define HIST 4664
@@ -148,8 +148,8 @@ int error_checking(int outcome, int type, int simpleChildSocket)
                 fprintf(stderr, "OK CONT 'Connection accepted!'\n");  // Non viene visualizzato dal client
                 strcat(buffer, "START 'Welcome!'");
                 break;
-            case SYNT:
-                strcat(buffer, "SYNT 'Correct syntax!'");
+            case SYNTAX:
+                strcat(buffer, "SYNTAX 'Correct syntax!'");
                 break;
             case QUIT:
                 strcat(buffer, "QUIT 'Connection closed'");//, wait another client'");
@@ -181,8 +181,8 @@ int error_checking(int outcome, int type, int simpleChildSocket)
             case CONT:
                 strcat(buffer, "CONT 'Cannot accept connections!'");
                 break;
-            case SYNT:
-                strcat(buffer, "SYNT 'Incorrect syntax!'");
+            case SYNTAX:
+                strcat(buffer, "SYNTAX 'Incorrect syntax!'");
                 break;
             case QUIT:
                 strcat(buffer, "QUIT 'Connection closed, end of the program'");
@@ -364,7 +364,7 @@ int client_waiting(int simpleChildSocket)
         {
             fprintf(stderr, "%s", buffer);
             returnStatus = controlcommand(buffer);
-            error_checking(returnStatus, SYNT, simpleChildSocket);
+            error_checking(returnStatus, SYNTAX, simpleChildSocket);
             switch (returnStatus)
             {
                 case TEXT:  // se ha un errore nel TEXT li server termina
