@@ -277,7 +277,7 @@ int controltext(int simpleChildSocket, char buffer[])   /* contrlla il comando T
                 else if (current->next == NULL)
                 {
                     printf("NEXT NULLO1\n");
-                    current->next = newnode();  // Si blocca qui, quando il primo client crea x nodi e il secondo crea y(>x) nodi
+                    current->next = newnode();
                     printf("NEXT NULLO2\n");
                     current->next->next = NULL;
                     current = current->next;
