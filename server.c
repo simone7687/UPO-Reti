@@ -414,10 +414,11 @@ void deleteList()
     list next; 
     while (current != NULL)  
     {
-        next = current->next; 
-        free(current); 
-        current = next; 
+        current->counter = 0;
+        current = current->next;
+//        next = current->next; 
+//        free(current); 
+//        current = next; 
     } 
-    head = NULL; 
-}
+//    head = NULL; 
 }
