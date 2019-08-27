@@ -33,7 +33,8 @@ struct node
 typedef struct node element;
 typedef element *list;
 list newnode() {return malloc(sizeof(element));}
-void deleteList(list* head_ref); /* Function to delete the entire linked list */
+list head;
+void deleteList();  /* Elimina l'intera lista */
 
 int error_checking(int outcome, int type, int simpleChildSocket);   /* Invia messaggi di errore del server #1 (ritorna 1 per uscire dal programma)*/
 int client_waiting(int sockfd);    /* Il server si pone in attesa di un messaggio di comando #4 (ritorna 0 per concludere la connesione)*/
@@ -221,7 +222,7 @@ int controlcommand(char buffer[])   /* Correttezza dei messaggi ricevuti #7 */
     return 0;
 }
 
-int controltext(int simpleChildSocket, char buffer[], element* l)   /* contrlla il comando TEXT #8 (ritorna 1 se è sbagliato)*/
+int controltext(int simpleChildSocket, char buffer[])   /* contrlla il comando TEXT #8 (ritorna 1 se è sbagliato)*/
 {
     int count=0, count2 = 0, figures = -1;
     char n[10], m[10];
@@ -245,38 +246,48 @@ int controltext(int simpleChildSocket, char buffer[], element* l)   /* contrlla 
     count2 = count2 - figures;
 
     // serve per HIST #5
-    list head = l;
+    list current = head;
     for (int i = 5, k = count2; i < (MAX_CHAR) && buffer[i] != '\n' && buffer[i] != '\0' && k != 0; i++, k--)
     {
         if (isalnum(buffer[i]))
         {
-            l = head;
+            current = head;
             int y = 1;
             while(y)
             {
-                if (l->alphanumber == buffer[i])
+                if (current == NULL)
                 {
-                    l->counter++;
-                    y=0;
+                    printf("PRIMO NULLO\n");
+                    current = newnode();
+                    current->next = NULL;
+                    current->alphanumber = buffer[i];
+                    current->counter = 1;
+                    y = 0;
                 }
-                else if (l->alphanumber == '\0')
+                else if (current->alphanumber == buffer[i])
                 {
-                    l->alphanumber = buffer[i];
-                    l->counter = 1;
-                    y=0;
+                    current->counter++; y = 0;
                 }
-                else if (l->next == NULL)
+                else if (!isalnum(current->alphanumber) || current->counter == 0)
                 {
-                    l->next = newnode();
-                    l->next->next = NULL;
-                    l = l->next;
-                    l->alphanumber = buffer[i];
-                    l->counter = 1;
-                    y=0;
+                    current->alphanumber = buffer[i];
+                    current->counter = 1;
+                    y = 0;
+                }
+                else if (current->next == NULL)
+                {
+                    printf("NEXT NULLO1\n");
+                    current->next = newnode();  // Si blocca qui, quando il primo client crea x nodi e il secondo crea y(>x) nodi
+                    printf("NEXT NULLO2\n");
+                    current->next->next = NULL;
+                    current = current->next;
+                    current->alphanumber = buffer[i];
+                    current->counter = 1;
+                    y = 0;
                 }
                 else
                 {
-                    l=l->next;
+                    current = current->next;
                 }
             }
         }
@@ -309,36 +320,41 @@ int controltext(int simpleChildSocket, char buffer[], element* l)   /* contrlla 
     }
 }
 
-void hist(element* l, int simpleChildSocket) /* il comando HIST #8 */
+void hist(int simpleChildSocket) /* il comando HIST #8 */
 {
 	char c[5], buffer[512];
-    list head = l;
-	if (l != NULL)
+    list current = head;
+	if (current != NULL)
 	{
-        l = head;
+        current = head;
         while(1)
         {
             sleep(1);
             memset(&buffer, '\0', sizeof(buffer));
             strcat(buffer, "OK HIST ");
-            for (int i = 0; i < 7; i++)
+            for (int i = 0; i < 7 && current != NULL; i++)
             {
-                memset(&c, '\0', sizeof(c));
-                c[0] = l->alphanumber;
-                strcat(buffer, c);
-                strcat(buffer, ":");
-                sprintf(c, "%d", l->counter);
-                strcat(buffer, c);
-                strcat(buffer, " ");
-                if (l->next != NULL)
-                {l=l->next;}
+                if (isalnum(current->alphanumber))
+                {
+                    memset(&c, '\0', sizeof(c));
+                    c[0] = current->alphanumber;
+                    strcat(buffer, c);
+                    strcat(buffer, ":");
+                    sprintf(c, "%d", current->counter);
+                    strcat(buffer, c);
+                    strcat(buffer, " ");
+                }
+                else 
+                {i--;}
+                if (current->next != NULL)
+                {current=current->next;}
                 else
                 {break;}
             }
             strcat(buffer, "\n");
             write(simpleChildSocket, buffer, strlen(buffer));
             fprintf(stderr, "%s", buffer);
-            if (l->next == NULL)
+            if (current->next == NULL)
             {break;}
         }
 	}
@@ -353,7 +369,7 @@ int client_waiting(int simpleChildSocket)
     char buffer[MAX_CHAR];
     int returnStatus = 0;
     // inizializzo una lista
-    list head = newnode();
+    head = newnode();
     head->counter = 0;
     list *l = &head;
 
@@ -369,38 +385,39 @@ int client_waiting(int simpleChildSocket)
             switch (returnStatus)
             {
                 case TEXT:  // se ha un errore nel TEXT li server termina
-                    if (controltext(simpleChildSocket, buffer, *l))
-                    {deleteList(l);return 0;}
+                    if (controltext(simpleChildSocket, buffer))
+                    {deleteList();return 0;}
                     break;
                 case HIST:
-                    hist(*l, simpleChildSocket);
+                    hist(simpleChildSocket);
                     break;
                 case EXIT:  // il server chiuse la connesione con il client e ne aspetta un altro
-                    hist(*l, simpleChildSocket);
+                    hist(simpleChildSocket);
                     error_checking(1, EXIT, simpleChildSocket);
-                    deleteList(l);return 1;
+                    deleteList();return 1;
                     break;
                 case QUIT:  // il server chiuse la connesione con il client e ne aspetta un altro
                     error_checking(1, QUIT, simpleChildSocket);
-                    deleteList(l);return 1;
+                    deleteList();return 1;
                     break;
-                case 0:
-                    deleteList(l);return 0;
+                case 0: // se ha un errore di sintassi li server termina
+                    deleteList();return 0;
                     break;
             }
         }
     }
 } 
 
-void deleteList(list* head_ref) /* Elimina l'intera lista */
+void deleteList()
 { 
-   list current = *head_ref; 
-   list next; 
-   while (current != NULL)  
-   { 
-       next = current->next; 
-       free(current); 
-       current = next; 
-   } 
-   *head_ref = NULL; 
+    list current = head; 
+    list next; 
+    while (current != NULL)  
+    {
+        next = current->next; 
+        free(current); 
+        current = next; 
+    } 
+    head = NULL; 
+}
 }
