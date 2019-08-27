@@ -270,10 +270,15 @@ int execute_command(int simpleSocket)
         strcat(buffer, "\n");
         write(simpleSocket, buffer, strlen(buffer));
         hist(simpleSocket);
+        error_checking(simpleSocket);
         return 0;
     }
     else if (strncmp(buffer, "QUIT", 4) == 0)
-    {strcat(buffer, "\n"); write(simpleSocket, buffer, strlen(buffer));return 0;}
+    {
+        strcat(buffer, "\n");
+        write(simpleSocket, buffer, strlen(buffer));
+        error_checking(simpleSocket);
+        return 0;}
     else
     {printf("Riprova\n"); 
     for (int i = 0;(ch = getchar()) != '\n' && ch != EOF ; i++){}
