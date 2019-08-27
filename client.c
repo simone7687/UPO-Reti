@@ -266,7 +266,9 @@ int execute_command(int simpleSocket)
     else if (strncmp(buffer, "QUIT", 4) == 0)
     {strcat(buffer, "\n"); write(simpleSocket, buffer, strlen(buffer));return 0;}
     else
-    {printf("Riprova\n"); return 1;}
+    {printf("Riprova\n"); 
+    for (int i = 0;(ch = getchar()) != '\n' && ch != EOF ; i++){}
+    return 1;}
 
     memset(&buffer, '\0', sizeof(buffer));
 
