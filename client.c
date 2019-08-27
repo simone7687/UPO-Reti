@@ -266,7 +266,12 @@ int execute_command(int simpleSocket)
     else if (strncmp(buffer, "HIST", 4) == 0)
     {if(hist(simpleSocket)) {return 0;}}
     else if (strncmp(buffer, "EXIT", 4) == 0)
-    {strcat(buffer, "\n"); write(simpleSocket, buffer, strlen(buffer));if(hist(simpleSocket)) {return 0;} return 0;}
+    {
+        strcat(buffer, "\n");
+        write(simpleSocket, buffer, strlen(buffer));
+        hist(simpleSocket);
+        return 0;
+    }
     else if (strncmp(buffer, "QUIT", 4) == 0)
     {strcat(buffer, "\n"); write(simpleSocket, buffer, strlen(buffer));return 0;}
     else
