@@ -308,7 +308,7 @@ int controltext(int simpleChildSocket, char buffer[], element* l)   /* contrlla 
     }
 }
 
-int hist(element* l, int simpleChildSocket) /* il comando HIST #8 (ritorna 1 se è sbagliato)*/
+void hist(element* l, int simpleChildSocket) /* il comando HIST #8 */
 {
 	char c[5], buffer[512];
     list head = l;
