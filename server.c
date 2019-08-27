@@ -9,12 +9,12 @@
 #define MAX_CHAR 512    /* lunghezza massima */
 
 // I tipi di messaggi
-#define ARGOMENT 45645  /* argomenti */
-#define SOCKETCR 76567  /* creazione socket */
-#define BINDADRS 43654  /* bind address */
-#define SOCKETLS 63473  /* socket connesso */
-#define CONNECTA 47645  /* connesione accettata */
-#define ERRSYNTX 75648  /* sintassi */
+#define ARGO 45645  /* argomenti */
+#define SOCR 76567  /* creazione socket */
+#define BIND 43654  /* bind address */
+#define SOLS 63473  /* socket connesso */
+#define CONT 47645  /* connesione accettata */
+#define SYNT 75648  /* sintassi */
 
 #define TEXT 5466
 #define HIST 4664
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
     
     int clientNameLength = 0;
 
-    if (error_checking(2 == argc, ARGOMENT, 0))
+    if (error_checking(2 == argc, ARGO, 0))
     {
         fprintf(stderr, "%s <port>'\n", argv[0]);
         exit(1);
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     simpleSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     // verifica creazione socket
-    if (error_checking(simpleSocket != -1, SOCKETCR, 0))
+    if (error_checking(simpleSocket != -1, SOCR, 0))
     {
         exit(1);
     }
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     returnStatus = bind(simpleSocket,(struct sockaddr *)&simpleServer,sizeof(simpleServer));
 
     // verifica bind
-    if (error_checking(returnStatus == 0, BINDADRS, 0))
+    if (error_checking(returnStatus == 0, BIND, 0))
     {
         close(simpleSocket);
         exit(1);
@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
     returnStatus = listen(simpleSocket, 5);
 
     // verifica socket
-    if (error_checking(returnStatus != -1, SOCKETLS, 0))
+    if (error_checking(returnStatus != -1, SOLS, 0))
     {
         close(simpleSocket);
         exit(1);
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
         simpleChildSocket = accept(simpleSocket,(struct sockaddr *)&clientName, &clientNameLength);
 
         // verfica se e' stata accettata la connessione
-        if (error_checking(simpleChildSocket != -1, CONNECTA, simpleChildSocket))
+        if (error_checking(simpleChildSocket != -1, CONT, simpleChildSocket))
         {
             close(simpleSocket);
             exit(1);
@@ -131,25 +131,26 @@ int error_checking(int outcome, int type, int simpleChildSocket)
         // identifica il comando al quale la risposta fa riferimento, o la categoria di risposta.
         switch (type)
         {
-            case ARGOMENT:
-                strcat(buffer, "ARGOMENT 'Correct argument'");
+            case ARGO:
+                strcat(buffer, "ARGO 'Correct argument'");
                 break;
-            case SOCKETCR:
-                strcat(buffer, "SOCKETCR 'Socket created!'");
+            case SOCR:
+                strcat(buffer, "SOCR 'Socket created!'");
                 break;
-            case BINDADRS:
-                strcat(buffer, "BINDADRS 'Bind completed!'");
+            case BIND:
+                strcat(buffer, "BIND 'Bind completed!'");
                 break;
-            case SOCKETLS:
-                strcat(buffer, "SOCKETLS 'Can listen on socket!'");
+            case SOLS:
+                strcat(buffer, "SOLS 'Can listen on socket!'");
                 break;
             // All’apertura della connessione il server manda un messaggio di benvenuto (server) #2
-            case CONNECTA:
-                fprintf(stderr, "OK CONNECTA 'Connection accepted!'\n");  // Non viene visualizzato dal client
+            case CONT:
+                fprintf(stderr, "OK CONT 'Connection accepted!'\n");  // Non viene visualizzato dal client
                 strcat(buffer, "START 'Welcome!'");
                 break;
-            case ERRSYNTX:
-                strcat(buffer, "SYNTAX 'Correct syntax!'");
+            case SYNT:
+                strcat(buffer, "SYNT 'Correct syntax!'");
+                break;
                 break;
         }
     }
@@ -159,24 +160,25 @@ int error_checking(int outcome, int type, int simpleChildSocket)
         // identifica il comando al quale la risposta fa riferimento, o la categoria di risposta.
         switch (type)
         {
-            case ARGOMENT:
-                strcat(buffer, "ARGOMENT 'Usage: ");
+            case ARGO:
+                strcat(buffer, "ARGO 'Usage: ");
                 fprintf(stderr, "%s", buffer);
                 return !outcome;
-            case SOCKETCR:
-                strcat(buffer, "SOCKETCR 'Could not create a socket!'");
+            case SOCR:
+                strcat(buffer, "SOCR 'Could not create a socket!'");
                 break;
-            case BINDADRS:
-                strcat(buffer, "BINDADRS 'Could not bind to address!'");
+            case BIND:
+                strcat(buffer, "BIND 'Could not bind to address!'");
                 break;
-            case SOCKETLS:
-                strcat(buffer, "SOCKETLS 'Cannot listen on socket!'");
+            case SOLS:
+                strcat(buffer, "SOLS 'Cannot listen on socket!'");
                 break;
-            case CONNECTA:
-                strcat(buffer, "CONNECTA 'Cannot accept connections!'");
+            case CONT:
+                strcat(buffer, "CONT 'Cannot accept connections!'");
                 break;
-            case ERRSYNTX:
-                strcat(buffer, "SYNTAX 'Incorrect syntax!'");
+            case SYNT:
+                strcat(buffer, "SYNT 'Incorrect syntax!'");
+                break;
                 break;
         }
     }
@@ -355,7 +357,7 @@ int client_waiting(int simpleChildSocket)
         {
             fprintf(stderr, "%s", buffer);
             returnStatus = controlcommand(buffer);
-            error_checking(returnStatus, ERRSYNTX, simpleChildSocket);
+            error_checking(returnStatus, SYNT, simpleChildSocket);
             switch (returnStatus)
             {
                 case TEXT:
