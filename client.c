@@ -12,6 +12,8 @@
 
 int print_messages(char returnStatus[]);    /* stampa il <MESSAGGIO> del messaggio ricevuto. Se il messaggio non ha errori sintattici ritorna 1 altrimenti 0 #11 #12 */
 char start[] = "OK START "; /* messaggio di benvento */
+// Le opzioni che il client offre (client) #13
+char illustration[] = "The purpose of the program is manage the relationship with the server is the client\nThe options available are:\n a. TEXT <message>: send a message to the server.\n b. HIST: request the distribution of the text characters sent so far(only alphanumeric characters).\n c. EXIT: executes HIST and closes the connection.\n d. QUIT: closes the connection.\n";
 int execute_command(int simpleSocket);  /* Esegue i comandi #14 */
 char command_line[] = "\nCommand > "; /* Command > */
 
@@ -87,6 +89,8 @@ int main(int argc, char *argv[])
             }
             else
             {
+                // Le opzioni che il client offre (client) #13
+                printf("%s", illustration);
                 // Il client sollecita l’utente ad inserire il testo #14
                 printf("%s", command_line);
                 while (execute_command(simpleSocket))
