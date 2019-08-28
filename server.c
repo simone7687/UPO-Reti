@@ -257,7 +257,6 @@ int controltext(int simpleChildSocket, char buffer[])   /* contrlla il comando T
             {
                 if (current == NULL)
                 {
-                    printf("PRIMO NULLO\n");
                     current = newnode();
                     current->next = NULL;
                     current->alphanumber = buffer[i];
@@ -276,9 +275,7 @@ int controltext(int simpleChildSocket, char buffer[])   /* contrlla il comando T
                 }
                 else if (current->next == NULL)
                 {
-                    printf("NEXT NULLO1\n");
                     current->next = newnode();
-                    printf("NEXT NULLO2\n");
                     current->next->next = NULL;
                     current = current->next;
                     current->alphanumber = buffer[i];
