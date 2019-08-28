@@ -125,6 +125,7 @@ int error_checking(int outcome, int type, int simpleChildSocket)
     char buffer[MAX_CHAR];
     char err[] = "ERR ";
     char ok[] = "OK ";
+    memset(&buffer, '\0', sizeof(buffer));
 
     // identifica l’esito positivo o negativo del messaggio e può assumere i valori OK ed ERR
     if (outcome)
