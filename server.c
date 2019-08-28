@@ -390,11 +390,11 @@ int client_waiting(int simpleChildSocket)
                     break;
                 case EXIT:  // il server chiuse la connesione con il client e ne aspetta un altro
                     hist(simpleChildSocket);
-                    error_checking(1, EXIT, simpleChildSocket);
+                    sleep(1); error_checking(1, EXIT, simpleChildSocket);
                     deleteList();return 1;
                     break;
                 case QUIT:  // il server chiuse la connesione con il client e ne aspetta un altro
-                    error_checking(1, QUIT, simpleChildSocket);
+                    sleep(1); error_checking(1, QUIT, simpleChildSocket);
                     deleteList();return 1;
                     break;
                 case 0: // se ha un errore di sintassi li server termina
