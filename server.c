@@ -243,7 +243,8 @@ int controltext(int simpleChildSocket, char buffer[])   /* contrlla il comando T
     {
         if (isalnum(buffer[i])) {count2++;}
     }
-    count2 = count2 - figures;
+    if (count2 != 0)
+    {count2 = count2 - figures;}
 
     // serve per HIST #5
     list current = head;
