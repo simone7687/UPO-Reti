@@ -211,6 +211,8 @@ int error_checking(int outcome, int type, int simpleChildSocket)
 
 int controlcommand(char val[])   /* Correttezza dei messaggi ricevuti #7 */
 {
+    if (val[sizeof(head)] != '\n')
+        return 0;
     char head[strlen(val)];
     int l;
     int k = 0;
