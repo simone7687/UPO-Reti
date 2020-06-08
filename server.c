@@ -16,6 +16,8 @@
 #define SOLS 63473  /* socket connesso */
 #define CONT 47645  /* connesione accettata */
 #define SYNTAX 75648  /* sintassi */
+#define DATA 45748
+#define ZEROVAL 45678
 
 #define TEXT 5466
 #define HIST 4664
@@ -209,9 +211,11 @@ int error_checking(int outcome, int type, int simpleChildSocket)
     return !outcome;
 }
 
-int controlcommand(char val[])   /* Correttezza dei messaggi ricevuti #7 */
+int controlcommandsyntax(char val[])   /* Correttezza dei messaggi ricevuti (sintassi) #7 */
 {
     if (val[sizeof(head)] != '\n')
+        return 0;
+    if (sizeof(head) > MAX_CHAR)
         return 0;
     char head[strlen(val)];
     int l;
@@ -223,16 +227,24 @@ int controlcommand(char val[])   /* Correttezza dei messaggi ricevuti #7 */
     }
     memset(&val, '\0', sizeof(val));
     l = atoi(head);
-    if (l != 0)
-        for (int i = 0; val[i] != '\0'; i++)
+    if (l == 0)
+        return ZEROVAL;
+    else
+        return l;
+}
+
+int controlcommand(char val[], int l)   /* Correttezza dei messaggi ricevuti #7 */
+{
+    int k;
+    for (int i = 0; val[i] != '\0'; i++)
+    {
+        if (val[i] != ' ')
         {
-            if (val[i] != ' ')
-            {
-                k++;
-                while (val[i] == ' '; i++)
-                    i++;
-            }
+            k++;
+            while (val[i] == ' '; i++)
+                i++;
         }
+    }
     if (l == k)
         return l;
     else
@@ -395,28 +407,20 @@ int client_waiting(int simpleChildSocket)
         if (returnStatus > 0)   // Nel caso abbia ricevuto qualcosa svolgo le operazioni successive
         {
             fprintf(stderr, "%s", buffer);
-            returnStatus = controlcommand(buffer);
-            error_checking(returnStatus, SYNTAX, simpleChildSocket);
+            returnStatus = controlcommandsyntax(buffer);
             switch (returnStatus)
             {
-                case TEXT:  // se ha un errore nel TEXT li server termina
-                    if (controltext(simpleChildSocket, buffer))
-                    {deleteList();return 0;}
+                case 0:
+                    error_checking(returnStatus, SYNTAX, simpleChildSocket);
                     break;
-                case HIST:
-                    hist(simpleChildSocket);
-                    break;
-                case EXIT:  // il server chiuse la connesione con il client e ne aspetta un altro
-                    hist(simpleChildSocket);
-                    sleep(1); error_checking(1, EXIT, simpleChildSocket);
-                    deleteList();return 1;
-                    break;
-                case QUIT:  // il server chiuse la connesione con il client e ne aspetta un altro
-                    sleep(1); error_checking(1, QUIT, simpleChildSocket);
-                    deleteList();return 1;
-                    break;
-                case 0: // se ha un errore di sintassi li server termina
-                    deleteList();return 0;
+                case ZEROVAL:
+                    // TODO: 8.c
+                default:
+                    if (controlcommand(buffer, returnStatus);)
+                        // TODO: memorizza i dati e risponde con il messaggio `OK DATA <numero_dati_letti>` 
+                        // ovvero la stringa `OK DATA` seguita da uno spazio e da una stringa numerica 
+                        // che rappresenta il valore numero di dati estratti dal messaggio ricevuto.
+                    error_checking(returnStatus, DATA, simpleChildSocket);
                     break;
             }
         }
