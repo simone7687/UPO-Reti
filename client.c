@@ -239,13 +239,14 @@ int execute_command(int simpleSocket)
     int ch, returnStatus;
     
     if (strncmp(buffer, "/n", 5) == 0)
+    {
         printf("Riprova\n"); 
+        for (int i = 0;(ch = getchar()) != '\n' && ch != EOF ; i++){}
+        return 1;
+    }
     else
         if(text(simpleSocket))
             return 0;
-    
-    for (int i = 0;(ch = getchar()) != '\n' && ch != EOF ; i++){}
-    return 1;}
 
     memset(&buffer, '\0', sizeof(buffer));
 
