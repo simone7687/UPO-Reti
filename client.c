@@ -192,7 +192,7 @@ int text(int simpleSocket)  /* Inserimento del testo #14  (return 1 se ha un err
     while(i < MAX_CHAR-cifre)
     {
         if (isgraph(val[i]) != 0)
-            return 0;
+            return 1;
         if (val[i] != ' ')
         {
             caratteri++;
