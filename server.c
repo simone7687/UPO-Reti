@@ -209,18 +209,32 @@ int error_checking(int outcome, int type, int simpleChildSocket)
     return !outcome;
 }
 
-int controlcommand(char buffer[])   /* Correttezza dei messaggi ricevuti #7 */
+int controlcommand(char val[])   /* Correttezza dei messaggi ricevuti #7 */
 {
-    if (strncmp(buffer, "TEXT ", 5) == 0)
-    {return TEXT;}
-    else if (strncmp(buffer, "HIST", 4) == 0)
-    {return HIST;}
-    else if (strncmp(buffer, "EXIT", 4) == 0)
-    {return EXIT;}
-    else if (strncmp(buffer, "QUIT", 4) == 0)
-    {return QUIT;}
-    // In caso il comando non fosse riconosciuto, ritorna 0
-    return 0;
+    char head[strlen(val)];
+    int l;
+    int k = 0;
+    memset(&head, '\0', sizeof(head));
+    for (int i = 0; val[i] != ' ' && val[i] != '\0'; i++)
+    {
+        head[i] = val[i];
+    }
+    memset(&val, '\0', sizeof(val));
+    l = atoi(head);
+    if (l != 0)
+        for (int i = 0; val[i] != '\0'; i++)
+        {
+            if (val[i] != ' ')
+            {
+                k++;
+                while (val[i] == ' '; i++)
+                    i++;
+            }
+        }
+    if (l == k)
+        return l;
+    else
+        return 0;
 }
 
 int controltext(int simpleChildSocket, char buffer[])   /* contrlla il comando TEXT #8 (ritorna 1 se è sbagliato)*/
