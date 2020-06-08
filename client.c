@@ -191,6 +191,8 @@ int text(int simpleSocket)  /* Inserimento del testo #14  (return 1 se ha un err
     // conta numeri
     while(i < MAX_CHAR-cifre)
     {
+        if (isgraph(val[i]) != 0)
+            return 0;
         if (val[i] != ' ')
         {
             caratteri++;
@@ -232,17 +234,9 @@ int text(int simpleSocket)  /* Inserimento del testo #14  (return 1 se ha un err
 
 int execute_command(int simpleSocket)
 {
-    // TODO: verifica che non ci siano lettere
     char buffer[MAX_CHAR];
     memset(&buffer, '\0', sizeof(buffer));
     int ch, returnStatus;
-    for (int i = 0; i < 5; i++)
-    {
-        if ((ch = getchar()) != '\n' && ch != EOF)
-        {buffer[i] = ch;}
-        else
-        {break;}
-    }
     
     if (strncmp(buffer, "/n", 5) == 0)
         printf("Riprova\n"); 

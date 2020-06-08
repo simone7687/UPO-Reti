@@ -235,7 +235,6 @@ int controlcommandsyntax(char val[])   /* Correttezza dei messaggi ricevuti (sin
 
 int controlcommand(char val[], int l)   /* Correttezza dei messaggi ricevuti #7 */
 {
-    // TODO: verifica che non ci siano lettere
     int k;
     for (int i = 0; val[i] != '\0'; i++)
     {
@@ -245,6 +244,8 @@ int controlcommand(char val[], int l)   /* Correttezza dei messaggi ricevuti #7 
             while (val[i] == ' '; i++)
                 i++;
         }
+        if (isgraph(val[i]) != 0)
+            return 0;
     }
     if (l == k)
         return l;
