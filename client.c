@@ -13,7 +13,7 @@
 int print_messages(char returnStatus[]);    /* stampa il <MESSAGGIO> del messaggio ricevuto. Se il messaggio non ha errori sintattici ritorna 1 altrimenti 0 #11 #12 */
 char start[] = "OK START "; /* messaggio di benvento */
 // Le opzioni che il client offre (client) #13
-char illustration[] = "The purpose of the program is manage the relationship with the server is the client\nThe options available are:\n a. TEXT <message>: send a message to the server.\n b. HIST: request the distribution of the text characters sent so far(only alphanumeric characters).\n c. EXIT: executes HIST and closes the connection.\n d. QUIT: closes the connection.\n";
+char illustration[] = "Enter the numbers whose average and variance must be calculated, according to the criterion you prefer\n";
 int execute_command(int simpleSocket);  /* Esegue i comandi #14 */
 char command_line[] = "\nCommand > "; /* Command > */
 
@@ -183,30 +183,40 @@ int error_checking(int simpleSocket)    /* aspetta un messaggio del servre e con
 
 int text(int simpleSocket)  /* Inserimento del testo #14  (return 1 se ha un errore)*/
 {
-    char buffer[MAX_CHAR] = "TEXT ";
-    int ch, i = 5;
-    int cifre = 5+4+1;  // 5 per text, 4 per i numei e 1 per \n
+    int ch, i = 0;
+    int cifre = 1;
     int caratteri = 0;
     char char_caratteri[4];
-    // conta caratteri
-    while(i < MAX_CHAR-cifre+5)
+    char val[MAX_CHAR];
+    // conta numeri
+    while(i < MAX_CHAR-cifre)
     {
-        if ((ch = getchar()) != '\n' && ch != EOF)
+        if (val[i] != ' ')
         {
-            buffer[i] = ch;
-            i++;
-            if (isalnum(ch)) {caratteri++;}
+            caratteri++;
+            while (val[i] == ' '; i++)
+                i++;
         }
-        else
+        else if ((ch = getchar()) == '\n' || ch == EOF)
         {break;}
     }
-    buffer[i] = '\0';
+    val[i] = '\0';
     // invia messaggio
-    if(buffer[0] != '\0' && buffer[0] != '\n')
+    if(caratteri != 0)
     {
-        strcat(buffer, " ");
         sprintf(char_caratteri, "%d", caratteri);
         strcat(buffer, char_caratteri);
+        strcat(buffer, " ");
+        strcat(buffer, val);
+        strcat(buffer, "\n");
+        write(simpleSocket, buffer, strlen(buffer)); 
+        memset(&buffer, '\0', sizeof(buffer));
+        if(i >= MAX_CHAR-cifre) // se il messaggio è troppo grande
+        {if(text(simpleSocket)) {return 1;}}
+    }
+    else
+    {
+        strcat(buffer, "0");
         strcat(buffer, "\n");
         write(simpleSocket, buffer, strlen(buffer)); 
         memset(&buffer, '\0', sizeof(buffer));
@@ -220,36 +230,9 @@ int text(int simpleSocket)  /* Inserimento del testo #14  (return 1 se ha un err
     {return 1;}
 }
 
-int hist(int simpleSocket)  /* Analisi del testo #15  (return 1 se ha un errore)*/
-{
-    char buffer[MAX_CHAR];
-    int returnStatus;
-    // invia comando
-    memset(&buffer, '\0', sizeof(buffer));
-    strcat(buffer, "HIST\n");
-    write(simpleSocket, buffer, strlen(buffer));
-    // controlla sintassi
-    if (error_checking(simpleSocket))
-    {return 1;}
-    // riceve messaggio
-    while (1)
-    {
-        memset(&buffer, '\0', sizeof(buffer));
-        returnStatus = read(simpleSocket, buffer, sizeof(buffer));
-        if (returnStatus > 0)
-        {
-            if (strncmp(buffer, "OK HIST END", 11) == 0)
-            {return 0;}
-            else if (strncmp(buffer, "OK HIST ", 8) == 0)
-            {
-                print_messages(buffer);
-            }
-        }
-    }
-}
-
 int execute_command(int simpleSocket)
 {
+    // TODO: verifica che non ci siano lettere
     char buffer[MAX_CHAR];
     memset(&buffer, '\0', sizeof(buffer));
     int ch, returnStatus;
@@ -261,26 +244,12 @@ int execute_command(int simpleSocket)
         {break;}
     }
     
-    if (strncmp(buffer, "TEXT ", 5) == 0)
-    {if(text(simpleSocket)) {return 0;}}
-    else if (strncmp(buffer, "HIST", 4) == 0)
-    {if(hist(simpleSocket)) {return 0;}}
-    else if (strncmp(buffer, "EXIT", 4) == 0)
-    {
-        strcat(buffer, "\n");
-        write(simpleSocket, buffer, strlen(buffer));
-        hist(simpleSocket);
-        error_checking(simpleSocket);
-        return 0;
-    }
-    else if (strncmp(buffer, "QUIT", 4) == 0)
-    {
-        strcat(buffer, "\n");
-        write(simpleSocket, buffer, strlen(buffer));
-        error_checking(simpleSocket);
-        return 0;}
+    if (strncmp(buffer, "/n", 5) == 0)
+        printf("Riprova\n"); 
     else
-    {printf("Riprova\n"); 
+        if(text(simpleSocket))
+            return 0;
+    
     for (int i = 0;(ch = getchar()) != '\n' && ch != EOF ; i++){}
     return 1;}
 
