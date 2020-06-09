@@ -201,9 +201,9 @@ int error_checking(int outcome, int type, int simpleChildSocket)
 
 int controlcommandsyntax(char val[])   /* Correttezza dei messaggi ricevuti (sintassi) #7 */
 {
-    if (val[sizeof(head)] != '\n')
-        return 0;
-    if (sizeof(head) > MAX_CHAR)
+    // if (val[strlen(val)] != '\n')
+    //     return 0;
+    if (strlen(val) > MAX_CHAR)
         return 0;
     char head[strlen(val)];
     int l;
@@ -229,7 +229,7 @@ int controlcommand(char val[], int l)   /* Correttezza dei messaggi ricevuti #7 
         if (val[i] != ' ')
         {
             k++;
-            while (val[i] == ' '; i++)
+            while (val[i] == ' ')
                 i++;
         }
         if (isgraph(val[i]) != 0)
@@ -241,7 +241,7 @@ int controlcommand(char val[], int l)   /* Correttezza dei messaggi ricevuti #7 
         return 0;
 }
 
-int sum(char val[], int l)
+int sumVal(char val[])
 {
     int sum = 0;
     char s[strlen(val)];
@@ -270,9 +270,6 @@ int client_waiting(int simpleChildSocket)
     char buffer[MAX_CHAR];
     int returnStatus = 0;
     // inizializzo una lista
-    head = newnode();
-    head->counter = 0;
-    list *l = &head;
     int count = 0;
     int sum = 0;
 
@@ -294,7 +291,7 @@ int client_waiting(int simpleChildSocket)
                 default:
                     if (controlcommand(buffer, returnStatus))
                         count += returnStatus;
-                        sum += sum(buffer, returnStatus);
+                        sum += sumVal(buffer);
                         // TODO: risponde con il messaggio `OK DATA <numero_dati_letti>` 
                         // ovvero la stringa `OK DATA` seguita da uno spazio e da una stringa numerica 
                         // che rappresenta il valore numero di dati estratti dal messaggio ricevuto.
