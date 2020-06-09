@@ -212,6 +212,7 @@ int text(int simpleSocket)  /* Inserimento del testo #14  (return 1 se ha un err
     int caratteri = 0;
     char char_caratteri[4];
     char val[MAX_CHAR];
+    char buffer[MAX_CHAR];
     // conta numeri
     while(i < MAX_CHAR-cifre)
     {
@@ -246,8 +247,8 @@ int text(int simpleSocket)  /* Inserimento del testo #14  (return 1 se ha un err
         memset(&buffer, '\0', sizeof(buffer));
     }
     // controlla risposta del server
-    if(!error_checking(simpleSocket, char_caratteri))
-        return error_checking(simpleSocket, char_caratteri);
+    if(!error_checking(simpleSocket, caratteri))
+        return error_checking(simpleSocket, caratteri);
     else
         return 1;
     
