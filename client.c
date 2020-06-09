@@ -255,6 +255,18 @@ int text(int simpleSocket)  /* Inserimento del testo #14  (return 1 se ha un err
     if(i >= MAX_CHAR-cifre) // se il messaggio è troppo grande
         if(text(simpleSocket))
             return 1;
+    else 
+    {
+        if(text(simpleSocket))
+            return 1;
+        if(!error_checking(simpleSocket, caratteri))
+{            write(simpleSocket, "0", strlen(buffer)); 
+            read(simpleSocket, buffer, sizeof(buffer));
+            printf("%s\n",buffer);
+            return error_checking(simpleSocket, caratteri);}
+        else
+            return 1;
+    }
 }
 
 int execute_command(int simpleSocket)
