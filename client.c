@@ -208,7 +208,7 @@ int text(int simpleSocket, char head[])  /* Inserimento del testo #14  (return 1
             i++;
         }
         else
-        {break;}
+            break;
     }
     buffer[i] = '\0';
     // conta numeri
@@ -217,9 +217,10 @@ int text(int simpleSocket, char head[])  /* Inserimento del testo #14  (return 1
     {
         if (buffer[n] == ' ' && buffer[n] != '\0')
         {
-            caratteri++;
             while (buffer[n] == ' ')
                 n++;
+            if(buffer[n] != '\n' && buffer[n] != '\0')
+                caratteri++;
         }
         n++;
     }
@@ -235,12 +236,22 @@ int text(int simpleSocket, char head[])  /* Inserimento del testo #14  (return 1
         write(simpleSocket, val, strlen(val)); 
         memset(&val, '\0', sizeof(val));
         // controlla risposta del server
-        if(!error_checking(simpleSocket, caratteri))
+        if(error_checking(simpleSocket, caratteri))
             return error_checking(simpleSocket, caratteri);
+        if (i == MAX_CHAR-1)
+        {
+            if(text(simpleSocket, ""))
+                return 1;
+        }
         else
-            return 1;
-        if(text(simpleSocket, ""))
-            return 1;
+        {
+            strcat(val, "0");
+            strcat(val, "\n");
+            write(simpleSocket, val, strlen(val)); 
+            memset(&val, '\0', sizeof(val));
+            // controlla risposta del server
+            return error_checking(simpleSocket, caratteri);
+        }
     }
     else
     {
@@ -249,10 +260,7 @@ int text(int simpleSocket, char head[])  /* Inserimento del testo #14  (return 1
         write(simpleSocket, val, strlen(val)); 
         memset(&val, '\0', sizeof(val));
         // controlla risposta del server
-        if(!error_checking(simpleSocket, caratteri))
-            return error_checking(simpleSocket, caratteri);
-        else
-            return 1;
+        return error_checking(simpleSocket, caratteri);
     }
 }
 
@@ -270,6 +278,5 @@ int execute_command(int simpleSocket)
     }
 
     memset(&buffer, '\0', sizeof(buffer));
-    printf("Fine\n");
     return 1;
 }

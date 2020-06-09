@@ -230,6 +230,8 @@ int error_checking(int outcome, int type, int simpleChildSocket)
 
 int controlcommandsyntax(char val[])   /* Correttezza dei messaggi ricevuti (sintassi) #7 */
 {
+    if (val[0] == '0')
+        return ZEROVAL;
     // if (val[strlen(val)] != '\n')
     //     return 0;
     if (strlen(val) > MAX_CHAR)
@@ -257,9 +259,10 @@ int controlcommand(char val[], int l)   /* Correttezza dei messaggi ricevuti #7 
     {
         if (val[i] == ' ')
         {
-            k++;
             while (val[i] == ' ')
                 i++;
+            if(val[i] != '\n' && val[i] != '\0')
+                k++;
         }
         // if (isgraph(val[i]) != 0)
         //     return 0;
@@ -317,6 +320,7 @@ int client_waiting(int simpleChildSocket)
                     break;
                 case ZEROVAL:
                     // TODO: 8.c
+                    return 0;
                 default:
                     if (controlcommand(buffer, returnStatus))
                     {
