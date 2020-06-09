@@ -25,18 +25,6 @@
 #define QUIT 4575
 
 const char MESSAGE[] = "Hello UPO student!\n";
-// lista
-struct node
-{
-    char alphanumber;
-    int counter;
-    struct node *next;
-};
-typedef struct node element;
-typedef element *list;
-list newnode() {return malloc(sizeof(element));}
-list head;
-void deleteList();  /* Elimina l'intera lista */
 
 int error_checking(int outcome, int type, int simpleChildSocket);   /* Invia messaggi di errore del server #1 (ritorna 1 per uscire dal programma)*/
 int client_waiting(int sockfd);    /* Il server si pone in attesa di un messaggio di comando #4 (ritorna 0 per concludere la connesione)*/
@@ -253,144 +241,28 @@ int controlcommand(char val[], int l)   /* Correttezza dei messaggi ricevuti #7 
         return 0;
 }
 
-int controltext(int simpleChildSocket, char buffer[])   /* contrlla il comando TEXT #8 (ritorna 1 se è sbagliato)*/
+int sum(char val[], int l)
 {
-    int count=0, count2 = 0, figures = -1;
-    char n[10], m[10];
-    // copia le cifre al contrario
-    for (int i = strlen(buffer)-1; buffer[i] != ' ' && buffer[i] != '\0'; i--, figures++)
-    {
-        n[figures] = buffer[i];
-    }
-    // riordina le cife
-    for (int i = 0, k = figures; k != -1; i++, k--)
-    {
-        m[i] = n[k-1];
-    }
-    m[figures] = '\0';
-    count = atoi(m);
-    // conta i caratteri
-    for (int i = 5; i < (MAX_CHAR) && buffer[i] != '\n' && buffer[i] != '\0'; i++)
-    {
-        if (isalnum(buffer[i])) {count2++;}
-    }
-    if (count2 != 0)
-    {count2 = count2 - figures;}
+    int sum = 0;
+    char s[strlen(val)];
 
-    // serve per HIST #5
-    list current = head;
-    for (int i = 5, k = count2; i < (MAX_CHAR) && buffer[i] != '\n' && buffer[i] != '\0' && k != 0; i++, k--)
+    int l;
+    int k = 0;
+    memset(&head, '\0', sizeof(head));
+    for (int i = 0; val[i] != ' ' && val[i] != '\0'; i++) {}
+    for (int i = 0; val[i] == ' '; i++) {}
+    for (int i = 0; val[i] != '\0'; i++, k++)
     {
-        if (isalnum(buffer[i]))
+        s[k] = val[i];
+        if(val[i] != ' ')
         {
-            current = head;
-            int y = 1;
-            while(y)
-            {
-                if (current == NULL)
-                {
-                    current = newnode();
-                    current->next = NULL;
-                    current->alphanumber = buffer[i];
-                    current->counter = 1;
-                    y = 0;
-                }
-                else if (current->alphanumber == buffer[i])
-                {
-                    current->counter++; y = 0;
-                }
-                else if (!isalnum(current->alphanumber) || current->counter == 0)
-                {
-                    current->alphanumber = buffer[i];
-                    current->counter = 1;
-                    y = 0;
-                }
-                else if (current->next == NULL)
-                {
-                    current->next = newnode();
-                    current->next->next = NULL;
-                    current = current->next;
-                    current->alphanumber = buffer[i];
-                    current->counter = 1;
-                    y = 0;
-                }
-                else
-                {
-                    current = current->next;
-                }
-            }
+            l = atoi(s);
+            sum += l;
+            for (int j = 0; val[i] == ' ' ; i++) {}
         }
     }
-
-    sleep(1);
-    // invia un messagio al client
-    if(count2 == count)
-    {
-        strcpy(buffer, "OK TEXT ");
-        sprintf(n, "%d", count2);
-        strcat(buffer, n);
-        strcat(buffer, "\n");
-        write(simpleChildSocket, buffer, strlen(buffer));
-        fprintf(stderr, "%s", buffer); 
-        return 0;
-    }
-    else
-    {
-        strcpy(buffer, "ERR TEXT 'The characters counted by the client(");
-        sprintf(n, "%d", count);
-        strcat(buffer, n);
-        strcat(buffer, ") are different from the characters of the server(");
-        sprintf(n, "%d", count2);
-        strcat(buffer, n);
-        strcat(buffer, ")'\n");
-        write(simpleChildSocket, buffer, strlen(buffer));
-        fprintf(stderr, "%s", buffer); 
-        return 1;
-    }
-}
-
-void hist(int simpleChildSocket) /* il comando HIST #8 */
-{
-	char c[5], buffer[512];
-    list current = head;
-	if (current != NULL)
-	{
-        current = head;
-        while(1)
-        {
-            sleep(1);
-            memset(&buffer, '\0', sizeof(buffer));
-            strcat(buffer, "OK HIST ");
-            for (int i = 0; i < 7 && current != NULL; i++)
-            {
-                if (isalnum(current->alphanumber))
-                {
-                    memset(&c, '\0', sizeof(c));
-                    c[0] = current->alphanumber;
-                    strcat(buffer, c);
-                    strcat(buffer, ":");
-                    sprintf(c, "%d", current->counter);
-                    strcat(buffer, c);
-                    strcat(buffer, " ");
-                }
-                else 
-                {i--;}
-                if (current->next != NULL)
-                {current=current->next;}
-                else
-                {break;}
-            }
-            strcat(buffer, "\n");
-            write(simpleChildSocket, buffer, strlen(buffer));
-            fprintf(stderr, "%s", buffer);
-            if (current->next == NULL)
-            {break;}
-        }
-	}
-    memset(&buffer, '\0', sizeof(buffer));
-	strcat(buffer, "OK HIST END\n");
-    write(simpleChildSocket, buffer, strlen(buffer));
-    fprintf(stderr, "%s", buffer);
+    memset(&val, '\0', sizeof(val));
+    return sum;
 }
 
 int client_waiting(int simpleChildSocket)
@@ -401,6 +273,8 @@ int client_waiting(int simpleChildSocket)
     head = newnode();
     head->counter = 0;
     list *l = &head;
+    int count = 0;
+    int sum = 0;
 
     while (1)
     {
@@ -418,8 +292,10 @@ int client_waiting(int simpleChildSocket)
                 case ZEROVAL:
                     // TODO: 8.c
                 default:
-                    if (controlcommand(buffer, returnStatus);)
-                        // TODO: memorizza i dati e risponde con il messaggio `OK DATA <numero_dati_letti>` 
+                    if (controlcommand(buffer, returnStatus))
+                        count += returnStatus;
+                        sum += sum(buffer, returnStatus);
+                        // TODO: risponde con il messaggio `OK DATA <numero_dati_letti>` 
                         // ovvero la stringa `OK DATA` seguita da uno spazio e da una stringa numerica 
                         // che rappresenta il valore numero di dati estratti dal messaggio ricevuto.
                     error_checking(returnStatus, DATA, simpleChildSocket);
@@ -428,18 +304,3 @@ int client_waiting(int simpleChildSocket)
         }
     }
 } 
-
-void deleteList()
-{ 
-    list current = head; 
-    list next; 
-    while (current != NULL)  
-    {
-        current->counter = 0;
-        current = current->next;
-//        next = current->next; 
-//        free(current); 
-//        current = next; 
-    } 
-//    head = NULL; 
-}
