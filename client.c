@@ -8,6 +8,11 @@
 #include <arpa/inet.h>
 #include <ctype.h>
 
+// * 7. Dopo aver trasmesso ogni messaggio, il client si pone in attesa di una risposta da parte del server. Le risposte possibili sono:
+//    * a. OK DATA <numero>
+//    * b. OK STATS <numero> <media> <varianza>
+//    * c. ERR DATA <messaggio>
+//    * d. ERR STATS <messaggio> 
 #define MAX_CHAR 512    /* lunghezza massima */
 
 int print_messages(char returnStatus[]);    /* stampa il <MESSAGGIO> del messaggio ricevuto. Se il messaggio non ha errori sintattici ritorna 1 altrimenti 0 #11 #12 */
@@ -164,8 +169,24 @@ int print_messages(char buffer[])
     return 0;
 }
 
-int error_checking(int simpleSocket)    /* aspetta un messaggio del servre e controlla se questo è di errore (return 1 se ha un errore) */
+int error_checking(int simpleSocket, int val)    /* aspetta un messaggio del servre e controlla se questo è di errore (return 1 se ha un errore) */
 {
+    // * 8. Se la risposta indica la corretta ricezione di dati (caso 7a), 
+    // e il numero di dati ricevuti corrisponde al numero di dati trasmessi, 
+    // il client torna al punto 5 (o al punto 6a se i dati dell’utente sono già stati raccolti) e 
+    // manda un nuovo insieme di dati al server
+    
+    // * 9. Se la risposta indica la corretta ricezione di dati (caso 7a), 
+    // ma il numero di dati ricevuti è diverso dal numero di dati trasmessi, 
+    // il client segnala l’errore all’utente e torna al punto 6b per mandare al server il messaggio di fine dati “0”
+    
+    // * 10. Se il client ha spedito il messaggio di fine dati `0` e riceve come risposta l’elaborazione con successo 
+    // (caso 7b), il client ne estrae le informazioni e le riporta all’utente in maniera opportunamente informativa, 
+    // dopo di che chiude la connessione e termina l’esecuzione 
+    
+    // * 11. Se il client ha spedito il messaggio di fine dati `0` e la risposta indica un errore (caso 7d), 
+    // il client lo comunica all’utente riportando il messaggio del server (senza i delimitatori del protocollo), 
+    // insieme ad un eventuale messaggio da parte del client, dopo di che chiude la connessione e termina l’esecuzione
     int i;
     char buffer[MAX_CHAR];
     while (1)
@@ -174,9 +195,12 @@ int error_checking(int simpleSocket)    /* aspetta un messaggio del servre e con
         if (i > 0)
         {
             if(strncmp(buffer, "OK ", 3) == 0)
-            {return 0;}
+                return 0;
             else
-            {print_messages(buffer);return 1;}
+            {
+                print_messages(buffer);
+                return 1;
+            }
         }
     }
 }
@@ -196,11 +220,11 @@ int text(int simpleSocket)  /* Inserimento del testo #14  (return 1 se ha un err
         if (val[i] != ' ')
         {
             caratteri++;
-            while (val[i] == ' '; i++)
+            while (val[i] == ' ')
                 i++;
         }
         else if ((ch = getchar()) == '\n' || ch == EOF)
-        {break;}
+            break;
     }
     val[i] = '\0';
     // invia messaggio
@@ -213,8 +237,6 @@ int text(int simpleSocket)  /* Inserimento del testo #14  (return 1 se ha un err
         strcat(buffer, "\n");
         write(simpleSocket, buffer, strlen(buffer)); 
         memset(&buffer, '\0', sizeof(buffer));
-        if(i >= MAX_CHAR-cifre) // se il messaggio è troppo grande
-        {if(text(simpleSocket)) {return 1;}}
     }
     else
     {
@@ -222,14 +244,16 @@ int text(int simpleSocket)  /* Inserimento del testo #14  (return 1 se ha un err
         strcat(buffer, "\n");
         write(simpleSocket, buffer, strlen(buffer)); 
         memset(&buffer, '\0', sizeof(buffer));
-        if(i >= MAX_CHAR-cifre) // se il messaggio è troppo grande
-        {if(text(simpleSocket)) {return 1;}}
     }
     // controlla risposta del server
-    if(!error_checking(simpleSocket))
-    {return error_checking(simpleSocket);}
+    if(!error_checking(simpleSocket, char_caratteri))
+        return error_checking(simpleSocket, char_caratteri);
     else
-    {return 1;}
+        return 1;
+    
+    if(i >= MAX_CHAR-cifre) // se il messaggio è troppo grande
+        if(text(simpleSocket))
+            return 1;
 }
 
 int execute_command(int simpleSocket)
