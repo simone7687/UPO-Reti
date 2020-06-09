@@ -213,7 +213,7 @@ int controlcommandsyntax(char val[])   /* Correttezza dei messaggi ricevuti (sin
     {
         head[i] = val[i];
     }
-    memset(&val, '\0', sizeof(val));
+    // memset(&val, '\0', sizeof(val));
     l = atoi(head);
     if (l == 0)
         return ZEROVAL;
@@ -248,7 +248,7 @@ int sumVal(char val[])
 
     int l;
     int k = 0;
-    memset(&head, '\0', sizeof(head));
+    // memset(&val, '\0', sizeof(val));
     for (int i = 0; val[i] != ' ' && val[i] != '\0'; i++) {}
     for (int i = 0; val[i] == ' '; i++) {}
     for (int i = 0; val[i] != '\0'; i++, k++)
@@ -261,7 +261,7 @@ int sumVal(char val[])
             for (int j = 0; val[i] == ' ' ; i++) {}
         }
     }
-    memset(&val, '\0', sizeof(val));
+    // memset(&val, '\0', sizeof(val));
     return sum;
 }
 
