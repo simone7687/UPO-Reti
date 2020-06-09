@@ -1,33 +1,24 @@
 # Laboratorio per il corso di Reti I (A.A. 2018/19) – Applicazione A 
  
-Sviluppare in linguaggio C un’applicazione di rete, costituita da un programma server ed un programma client, in cui il programma server calcola la distribuzione dei caratteri (diversi da spazi) che compongono un testo fornito dal client, secondo le specifiche sotto indicate.  In particolare, sono da tenere in considerazione tutti i caratteri ASCII a 7-bit alfanumerici (classe alnum), ovvero i caratteri alfabetici (classe alpha) e le cifre numeriche (classe digit). Le classi di caratteri sono quelle definite dall’ANSI C Standard Library e incluse in ctype.h. Questo esclude spazi, punteggiature, caratteri di controllo, e caratteri accentati. Per semplicità e uniformità si suppone che il server operi secondo la locale di default “C” o “POSIX”. 
+Sviluppare in linguaggio C un’applicazione di rete, costituita da un programma server ed un programma client, in cui il programma server calcola media e varianza di una serie di numeri interi positivi forniti dal client, secondo le specifiche sotto indicate.
  
 ## SERVER 
  
 * 1. Il programma server viene eseguito indicando sulla riga di comando la porta sulla quale mettersi in ascolto `$ programma_server <numero porta>`
 * 2. I messaggi inviati dal server hanno una lunghezza massima di 512 caratteri, devono essere terminati da un carattere di andata a capo (`\n`), e hanno il formato generale `<Esito> <Tipo> <Contenuto> <Esito>` identifica l’esito positivo o negativo del messaggio e può assumere i valori `OK` ed `ERR`.  `<Tipo>` identifica il comando al quale la risposta fa riferimento, o la categoria di risposta. `<Contenuto>` è il contenuto della risposta. Le tre sezioni sono separate da un singolo spazio (carattere ASCII 32, 0x20).  
 * 3. All’apertura della connessione il server manda un messaggio di benvenuto, nel formato `OK START <Messaggio>` ovvero la stringa `OK START`, seguita da uno spazio e da una stringa personalizzabile dal server. 
-* 4. Il server si pone in attesa di un messaggio di comando da parte del client. 
-* 5. I possibili comandi sono: Comando Descrizione `TEXT` Testo da analizzare `HIST` Richiede la distribuzione dei caratteri `EXIT` Termina la comunicazione, richiedendo i dati `QUIT` Termina la comunicazione, senza richiedere i dati 
-* 6. I comandi sono costituiti da stringhe della lunghezza massima di 512 caratteri, terminate da un carattere di andata a capo (`\n`). 
-* 7. La semantica e il formato dei comandi sono i seguenti:  
-   * a. Il comando `TEXT` permette al client di indicare del testo da analizzare, e ha il formato `TEXT <testo> <contatore>` ovvero la stringa `TEXT`, seguita da uno spazio, dal testo da analizzare, da uno spazio, da un contatore di controllo, e terminata da un carattere di andata a capo (`\n`). Il contatore di controllo `<contatore>` indica il numero di caratteri validi (ovvero alfanumerici, come descritto all’inizio della traccia) presenti nel testo `<testo>` ed è una stringa che rappresenta un valore numerico intero positivo. 
-Ad esempio: 
-`TEXT` Era una notte buia e tempestosa 26 Se il testo da analizzare supera la lunghezza permessa dai messaggi, il client può utilizzare più comandi `TEXT` per trasmettere il testo. 
-   * b. Il comando `HIST` richiede al server la distribuzione (istogramma) dei caratteri non spazio contenuti nel testo fornito dall’utente (tramite uno o più comandi `TEXT`) e ha il formato `HIST` ovvero la stringa `HIST` seguita da un carattere di andata a capo (`\n`). 
-   * c. Il comando `EXIT` premette al client di richiedere al server la distribuzione (istogramma) dei caratteri non spazio contenuti nel testo fornito dall’utente (tramite uno o più comandi `TEXT`), chiudendo al tempo stesso la connessione, e ha il formato `EXIT` ovvero la stringa `EXIT` seguita da un carattere di andata a capo (`\n`). L’effetto del comando `EXIT` è equivalente al comando `HIST` seguito da un comando `QUIT`. 
-   * d. Il comando `QUIT` permette al client di chiudere la connessione senza chiedere al server l’esito dei suoi calcoli e ha il formato `QUIT` ovvero la stringa `QUIT` seguita da un carattere di andata a capo (`\n`). 
-* 8. In tutti i comandi, il carattere di separazione tra i campi, se presente, è sempre costituito da un singolo spazio (carattere ASCII 32, 0x20). All’interno del testo da analizzare, sono da considerarsi solo i caratteri alfanumerici, riconosciuti come tali dal sistema locale (classe alnum), e qualsiasi altro carattere non va incluso nel contatore di controllo. 
-* 9. Il server esamina il messaggio ricevuto e ne verifica la correttezza sintattica. Se il messaggio non è sintatticamente corretto risponde con il messaggio ERR SYNTAX <messaggio> ovvero la stringa `ERR SYNTAX` seguita da uno spazio e da un messaggio di testo che descrive la natura dell’errore, e chiude la connessione.  
-* 10. Se il messaggio è sintatticamente corretto, il server risponde in base al comando ricevuto: 
-   * a. Alla ricezione del comando `TEXT`, il server verifica la correttezza semantica del messaggio, ovvero se il contatore è coerente con il contenuto del messaggio stesso. 
-      * Se il messaggio è semanticamente corretto, il server elabora la stringa ricevuta e risponde con un messaggio di conferma, nel formato `OK TEXT <contatore>` ovvero la stringa `OK TEXT` seguita da uno spazio e da una stringa numerica che rappresenta il valore corretto e verificato del contatore di controllo. 
-      * Se il messaggio non è semanticamente corretto, il server ignora la stringa ricevuta, risponde con un messaggio di errore e chiude la connessione. Il messaggio di errore ha formato `ERR TEXT <messaggio>` ovvero la stringa `ERR TEXT` seguita da uno spazio e da un messaggio di testo che descrive la natura dell’errore, e chiude la connessione. 
-   * b. Alla ricezione del comando `HIST`, il server risponde con uno o più messaggi nel formato `OK HIST <risposta>` ovvero la stringa `OK HIST` seguita da uno spazio e da una sequenza di coppie `<carattere>:<contatore>` separate da spazi, e terminata da un carattere di 
-andata a capo (`\n`). Solo i caratteri presenti nel testo analizzato devono essere inclusi nella risposta. Poiché i messaggi hanno una lunghezza massima, il server può utilizzare più messaggi di risposta per spedire tutte le informazioni al client. La sequenza di messaggi è quindi sempre terminata da un messaggio in cui la risposta è costituita dalla stringa `END`, ovvero `OK HIST END` Un esempio di risposta al comando `HIST` può quindi essere la seguente sequenza di messaggi `OK HIST E:1 a:4 b:1 e:4 i:1 m:1 n:2` `OK HIST o:2 p:1 r:1 s:2 t:4 u:2` `OK HIST END` 
-   * c. Alla ricezione del comando `EXIT`, il server risponde come se fosse stato ricevuto il comando `HIST`, ovvero con la sequenza di messaggi prevista dal comando `HIST`, seguita da un messaggio di chiusura nel formato `OK EXIT <messaggio>` ovvero la stringa `OK EXIT` seguita da uno spazio e da un messaggio di commiato, e chiude la connessione. 
-   * d. Alla ricezione del comando `QUIT`, il server risponde con un messaggio di chiusura nel formato `OK QUIT <messaggio>` ovvero la stringa `OK QUIT` seguita da uno spazio e da un messaggio di commiato, e chiude la connessione. 
-* 11. Dopo aver elaborato i dati e mandato il messaggio finale (casi 10.c e 10.d), o dopo aver mandato qualsiasi messaggio di errore, il server chiude la connessione e si pone in attesa della richiesta di un nuovo client. 
+* 4. Il server si pone in attesa di un messaggio da parte del client. 
+* 5. Il messaggio deve essere costituito da una stringa di testo nel formato `<Numero_dati> <dato1> <dato2> <datoN>` ovvero stringa con una serie di valori numerici interi positivi, terminata da un carattere di andata a capo (`\n`). Il primo valore indica il numero di dati presenti nella stringa, ed è seguito dai dati. Ad esempio: `4 11 21 9 11`
+* 6. I messaggi del client sono costituiti da stringhe della lunghezza massima di 512 caratteri, terminate da un carattere di andata a capo (`\n`). 
+* 7. Il server esamina il messaggio ricevuto e ne verifica la correttezza sintattica. Se il messaggio non è sintatticamente corretto risponde con il messaggio `ERR SYNTAX <messaggio>` ovvero la stringa `ERR SYNTAX` seguita da uno spazio e da un messaggio di testo che descrive la natura dell’errore, e chiude la connessione. 
+* 8. Se il messaggio è sintatticamente corretto, il server verifica la correttezza semantica del messaggio, ovvero se il contatore è coerente con il contenuto del messaggio stesso.
+   * a. Se il numero di dati letti è corretto e maggiore di zero, memorizza i dati e risponde con il messaggio `OK DATA <numero_dati_letti>` ovvero la stringa `OK DATA` seguita da uno spazio e da una stringa numerica che rappresenta il valore numero di dati estratti dal messaggio ricevuto.
+   * b. Se il numero di dati letti non è corretto, ovvero non il valore dichiarato non è coerente con il contenuto del messaggio, il server risponde con il messaggio `ERR DATA <messaggio>` ovvero la stringa `ERR DATA` seguita da uno spazio e da un messaggio di testo che descrive la natura dell’errore, e chiude la connessione.
+   * c. Se il numero di dati letti è uguale a `0`, ovvero il client aveva mandato il messaggio `0` il server elabora tutti i dati ricevuti e ne calcola la media e la varianza dei campioni.
+      * Se media e varianza dei campioni possono essere calcolati correttamente, il server trasmette il messaggio `OK STATS <numero totale campioni> <media> <varianza>` dove il numero dei campioni è un intero, mentre media e varianza sono dei valori floating point. Ad esempio `OK STATS 15 11.23 2.28`
+      * Se media o varianza dei campioni non possono essere calcolati correttamente, il server trasmette il messaggio `ERR STATS <Messaggio>` ovvero la stringa `ERR STATS`, seguita da uno spazio e da una stringa personalizzabile dal server che descrive la natura dell’errore.
+* 9. Dopo aver ricevuto i dati (caso 8.a), il server torna al punto 4 in attesa di un nuovo messaggio del client. 
+* 10. Dopo avere mandato il messaggio finale o aver mandato i messaggi di errore (casi 8.b e 8.c), il server chiude la connessione e si pone in attesa della richiesta di un nuovo client.
  
  
 ## CLIENT 
@@ -37,32 +28,22 @@ andata a capo (`\n`). Solo i caratteri presenti nel testo analizzato devono esse
 * 3. Dopo l’apertura della connessione il client si aspetta di ricevere dal server il messaggio di benvenuto, nel formato `OK START <Messaggio>` ovvero la stringa `OK START`, seguita da uno spazio e da una stringa personalizzata dal server. Il messaggio deve avere una lunghezza massima di 512 caratteri ed è terminato da un carattere di andata a capo (`\n`) 
 * 4. Il client presenta all’utente il messaggio del server, senza il delimitatore `OK START` che costituisce una parola chiave del protocollo di scambio e non fa parte del messaggio del server 
 * 5. Il client spiega chiaramente all’utente lo scopo del programma, le opzioni a disposizione, il formato atteso e le modalità di funzionamento previsto.  
-* 6. Le opzioni che il client offre all’utente sono: 
-   * a. Inserimento del testo 
-   * b. Analisi del testo 
-   * c. Uscita dal programma (con analisi del testo)  
-   * d. Abbandono del programma (senza analisi del testo) e corrispondono ai comandi del protocollo descritti al punto 5 del server. 
-* 7. Inserimento del testo 
-   * a. Il client sollecita l’utente ad inserire il testo che deve essere analizzato, secondo il criterio che preferisce (da tastiera, da file, una parola alla volta, ecc.). Una volta verificata la congruità del testo inserito, in relazione all’insieme di caratteri per il quale è previsto il calcolo della distribuzione, il client lo trasmette al server all’interno di uno o più comandi `TEXT`, secondo il formato descritto al punto 7.a del server. I messaggi trasmessi devono essere sintatticamente e semanticamente corretti.  
-   * b. Dopo aver trasmesso ogni comando, il client si pone in attesa della risposta del server.  
-      * In caso di risposta positiva (`OK`), il client prosegue le sue operazioni, eventualmente dando riscontro del successo all’utente.  
-      * In caso di errore (`ERR`), il client riporta all’utente l’eventuale messaggio del server (senza i delimitatori del protocollo), e chiude la connessione 
-* 8. Analisi del testo 
-   * a. Su richiesta dell’utente, il client richiede la distribuzione dei caratteri del testo finora inserito al server, trasmettendo al server un comando `HIST`, secondo il formato descritto al punto 7.b del server. 
-   * b. Dopo aver trasmesso il comando, il client si pone in attesa della risposta del server. 
-      * In caso di risposta positiva (`OK`), il client analizza la sequenza di messaggi descritta al punto 10.b del server, ne estrae le informazioni e le riporta all’utente in maniera opportunamente informativa. Questo significa che non è corretto proporre all’utente il contenuto dei messaggi ricevuti dal server in maniera acritica e senza alcuna elaborazione. 
-      * In caso di errore (`ERR`), il client riporta all’utente l’eventuale messaggio del server (senza i delimitatori del protocollo), e chiude la connessione 
-* 9. Uscita dal programma (con analisi del testo) 
-   * a. Il client trasmette al server il comando `EXIT,` secondo il formato descritto al punto 7.c del server 
-   * b. Dopo aver trasmesso il comando, il client si pone in attesa della risposta del server. 
-      * In caso di risposta positiva (`OK`), il client analizza la sequenza di messaggi descritta al punto 10.b del server, ne estrae le informazioni e le riporta all’utente in maniera opportunamente informativa. Poi si aspetta di ricevere il messaggio descritto al punto 10.c del server, ne riporta il contenuto (senza i delimitatori del protocollo) all’utente, e chiude la connessione. 
-      * In caso di errore (`ERR`), il client riporta all’utente l’eventuale messaggio del server (senza i delimitatori del protocollo), e chiude la connessione 
-* 10. Abbandono del programma (senza analisi del testo) 
-   * a. Il client trasmette al server il comando QUIT, secondo il formato descritto al punto 7.d del server 
-   * b. Dopo aver trasmesso il comando, il client si pone in attesa della risposta del server. 
-      * In caso di risposta positiva (`OK`) secondo il formato descritto al punto 10.d del server, il client ne riporta il contenuto (senza i delimitatori del protocollo) all’utente, e chiude la connessione. 
-      * In caso di errore (`ERR`), il client riporta all’utente l’eventuale messaggio del server (senza i delimitatori del protocollo), e chiude la connessione 
-* 11. In ogni caso di errore e dopo la chiusura della connessione, il client termina l’esecuzione. 
+* 6. Il client sollecita l’utente ad inserire i numeri di cui deve essere calcolata media e varianza, secondo il criterio che preferisce (da tastiera, da file, uno alla volta, a gruppi).
+   * a. Una volta verificata la congruità dei dati inseriti, in relazione allo scopo del programma, il client trasmette i dati al server all’interno di uno o più messaggi, secondo il formato descritto al punto 4 del server. I messaggi trasmessi devono essere sintatticamente e semanticamente corretti.
+   * b. A seconda della modalità di inserimento dei dati, quando il client non ha più dati da trasmettere manda un messaggio con `0` (zero) dati, segnalando implicitamente l’attesa dei risultati da parte del server.
+   * c. Dopo aver trasmesso ogni messaggio, il client si pone in attesa della risposta del server.
+      * In caso di risposta positiva (`OK`), il client prosegue le sue operazioni, eventualmente dando riscontro del successo all’utente
+      * In caso di errore (`ERR`), il client riporta all’utente l’eventuale messaggio del server (senza i delimitatori del protocollo), e chiude la connessione.
+* 7. Dopo aver trasmesso ogni messaggio, il client si pone in attesa di una risposta da parte del server. Le risposte possibili sono:
+   * a. `OK DATA <numero>`
+   * b. `OK STATS <numero> <media> <varianza>`
+   * c. `ERR DATA <messaggio>`
+   * d. `ERR STATS <messaggio>` 
+* 8. Se la risposta indica la corretta ricezione di dati (caso 7a), e il numero di dati ricevuti corrisponde al numero di dati trasmessi, il client torna al punto 5 (o al punto 6a se i dati dell’utente sono già stati raccolti) e manda un nuovo insieme di dati al server
+* 9. Se la risposta indica la corretta ricezione di dati (caso 7a), ma il numero di dati ricevuti è diverso dal numero di dati trasmessi, il client segnala l’errore all’utente e torna al punto 6b per mandare al server il messaggio di fine dati “0”
+* 10. Se il client ha spedito il messaggio di fine dati `0` e riceve come risposta l’elaborazione con successo (caso 7b), il client ne estrae le informazioni e le riporta all’utente in maniera opportunamente informativa, dopo di che chiude la connessione e termina l’esecuzione 
+* 11. Se il client ha spedito il messaggio di fine dati `0` e la risposta indica un errore (caso 7d), il client lo comunica all’utente riportando il messaggio del server (senza i delimitatori del protocollo), insieme ad un eventuale messaggio da parte del client, dopo di che chiude la connessione e termina l’esecuzione
+* 12. In ogni altro caso di errore (caso 7c e possibili casi non previsti), il client lo comunica all’utente riportando l’eventuale messaggio del server (senza i delimitatori del protocollo), insieme ad un eventuale messaggio da parte del client, dopo di che chiude la connessione e termina l’esecuzione
  
  
 Entrambi i programmi devono gestire opportunamente tutti i possibili errori che si possono verificare in fase di apertura e chiusura delle connessioni. Entrambi i programmi devono operare in maniera tale da rispettare il protocollo previsto e reagire opportunamente a violazioni di tale protocollo. Tutti i messaggi scambiati sono costituiti da stringhe terminate da un carattere di andata a capo (‘\n’). Tutte le parole chiave sono rappresentate da caratteri maiuscoli. Entrambi i programmi client e server devono essere in grado in inter-operare con programmi analoghi che rispettino i requisiti elencati: per questo motivo i messaggi di rete devono rispettare rigorosamente i formati definiti. L’interoperabilità è un requisito fondamentale che verrà verificato in fase di valutazione. Ogni altro aspetto di interazione tra il client, il server e l’utente, può essere personalizzato a piacimento, ad esempio i messaggi a schermo di notifica o di errore, nei limiti dell’utilizzabilità del programma stesso. La definizione della modalità di acquisizione dati da parte del client viene lasciata alla scelta dello studente. 
@@ -71,26 +52,26 @@ Entrambi i programmi devono gestire opportunamente tutti i possibili errori che 
 
 > S: OK START Benvenuto, mandami i tuoi dati 
 
-> C: TEXT questo e’ il testo 14 
+> C: 2 10 20
 
-> S: OK TEXT 14 
+> S: OK DATA 2
 
-> C: HIST 
+> C: 1 12
 
-> S: OK HIST e:3 i:1 l:1 q:1 o:2 
+> S: OK DATA 1
 
-> S: OK HIST u:1 t:3 s:2 
+> C: 0
 
-> S: OK HIST END 
-
-> C: QUIT 
-
-> S: OK QUIT Arrivederci 
+> S: OK STATS 3 14.0 28.0
 
 ----------------------------------------------------------------
 
-> S: OK Benvenuto, mandami i tuoi dati  
+> S: OK START Benvenuto, mandami i tuoi dati
 
-> C: TEXT questo testo 12 
+> C: 1 10
 
-> S: ERR TEXT Numero di caratteri non coerente
+> S: OK DATA 1
+
+> C: 0
+
+> S: ERR STATS Non posso calcolare la varianza di 1 campione
