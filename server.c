@@ -108,7 +108,44 @@ int main(int argc, char *argv[])
     close(simpleSocket);
     return 0;
 }
+int data_error_checking(int outcome, int n, int simpleChildSocket)
+{
+    // lunghezza massima di 512 caratteri #1
+    char buffer[MAX_CHAR];
+    char cn[7];
+    char err[] = "ERR ";
+    char ok[] = "OK ";
+    memset(&buffer, '\0', sizeof(buffer));
 
+    // identifica l’esito positivo o negativo del messaggio e può assumere i valori OK ed ERR
+    if (outcome)
+    {
+        strcpy(buffer, ok);
+        strcat(buffer, "DATA %d");
+        sprintf(cn, "%d", n);
+        strcat(buffer, cn);
+    }
+    else
+    {
+        strcpy(buffer, err);
+        strcat(buffer, "DATA 'Not correct data'");
+    }
+    strcat(buffer, "\n");
+
+    // verifivo se può essere inviato anche al client
+    if (simpleChildSocket == 0)
+    {
+        fprintf(stderr, "%s", buffer);
+    }
+    else
+    {
+        fprintf(stderr, "%s", buffer);
+        // invia un messaggio al client
+        write(simpleChildSocket, buffer, strlen(buffer));
+    }
+    // input di chiusura del programma
+    return !outcome;
+}
 int error_checking(int outcome, int type, int simpleChildSocket)
 {
     // lunghezza massima di 512 caratteri #1
@@ -290,12 +327,19 @@ int client_waiting(int simpleChildSocket)
                     // TODO: 8.c
                 default:
                     if (controlcommand(buffer, returnStatus))
+                    {
                         count += returnStatus;
                         sum += sumVal(buffer);
+                        data_error_checking(1, returnStatus, simpleChildSocket);
+                    }
+                    else
+                    {
+                        data_error_checking(0, returnStatus, simpleChildSocket);
+                    }
+                    
                         // TODO: risponde con il messaggio `OK DATA <numero_dati_letti>` 
                         // ovvero la stringa `OK DATA` seguita da uno spazio e da una stringa numerica 
                         // che rappresenta il valore numero di dati estratti dal messaggio ricevuto.
-                    error_checking(returnStatus, DATA, simpleChildSocket);
                     break;
             }
         }
