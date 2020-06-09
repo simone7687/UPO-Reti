@@ -189,7 +189,7 @@ int error_checking(int simpleSocket, int val)    /* aspetta un messaggio del ser
     }
 }
 
-int text(int simpleSocket)  /* Inserimento del testo #14  (return 1 se ha un errore)*/
+int text(int simpleSocket, char head[])  /* Inserimento del testo #14  (return 1 se ha un errore)*/
 {
     int ch, i = 0;
     int cifre = 1;
@@ -229,18 +229,17 @@ int text(int simpleSocket)  /* Inserimento del testo #14  (return 1 se ha un err
         sprintf(char_caratteri, "%d", caratteri);
         strcat(val, char_caratteri);
         strcat(val, " ");
+        strcat(val, head);
         strcat(val, buffer);
         strcat(val, "\n");
         write(simpleSocket, val, strlen(val)); 
         memset(&val, '\0', sizeof(val));
         // controlla risposta del server
-        printf("ciao\n");
         if(!error_checking(simpleSocket, caratteri))
             return error_checking(simpleSocket, caratteri);
         else
             return 1;
-        printf("ciao\n");
-        if(text(simpleSocket))
+        if(text(simpleSocket, ""))
             return 1;
     }
     else
@@ -264,8 +263,11 @@ int execute_command(int simpleSocket)
     int ch, returnStatus;
     
     if ((ch = getchar()) != '\n' && ch != EOF)
-        if(text(simpleSocket))
+    {
+        buffer[0] = ch;
+        if(text(simpleSocket, buffer))
             return 0;
+    }
 
     memset(&buffer, '\0', sizeof(buffer));
     printf("Fine\n");

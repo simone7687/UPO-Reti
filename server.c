@@ -121,7 +121,7 @@ int data_error_checking(int outcome, int n, int simpleChildSocket)
     if (outcome)
     {
         strcpy(buffer, ok);
-        strcat(buffer, "DATA %d");
+        strcat(buffer, "DATA ");
         sprintf(cn, "%d", n);
         strcat(buffer, cn);
     }
@@ -132,17 +132,9 @@ int data_error_checking(int outcome, int n, int simpleChildSocket)
     }
     strcat(buffer, "\n");
 
-    // verifivo se può essere inviato anche al client
-    if (simpleChildSocket == 0)
-    {
-        fprintf(stderr, "%s", buffer);
-    }
-    else
-    {
-        fprintf(stderr, "%s", buffer);
-        // invia un messaggio al client
-        write(simpleChildSocket, buffer, strlen(buffer));
-    }
+    fprintf(stderr, "%s", buffer);
+    // invia un messaggio al client
+    write(simpleChildSocket, buffer, strlen(buffer));
     // input di chiusura del programma
     return !outcome;
 }
@@ -263,14 +255,14 @@ int controlcommand(char val[], int l)   /* Correttezza dei messaggi ricevuti #7 
     int k;
     for (int i = 0; val[i] != '\0'; i++)
     {
-        if (val[i] != ' ')
+        if (val[i] == ' ')
         {
             k++;
             while (val[i] == ' ')
                 i++;
         }
-        if (isgraph(val[i]) != 0)
-            return 0;
+        // if (isgraph(val[i]) != 0)
+        //     return 0;
     }
     if (l == k)
         return l;
@@ -333,13 +325,10 @@ int client_waiting(int simpleChildSocket)
                         data_error_checking(1, returnStatus, simpleChildSocket);
                     }
                     else
-                    {
                         data_error_checking(0, returnStatus, simpleChildSocket);
-                    }
-                    
-                        // TODO: risponde con il messaggio `OK DATA <numero_dati_letti>` 
-                        // ovvero la stringa `OK DATA` seguita da uno spazio e da una stringa numerica 
-                        // che rappresenta il valore numero di dati estratti dal messaggio ricevuto.
+                    // TODO: risponde con il messaggio `OK DATA <numero_dati_letti>` 
+                    // ovvero la stringa `OK DATA` seguita da uno spazio e da una stringa numerica 
+                    // che rappresenta il valore numero di dati estratti dal messaggio ricevuto.
                     break;
             }
         }
