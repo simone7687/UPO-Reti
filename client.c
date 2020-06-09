@@ -18,7 +18,7 @@
 int print_messages(char returnStatus[]);    /* stampa il <MESSAGGIO> del messaggio ricevuto. Se il messaggio non ha errori sintattici ritorna 1 altrimenti 0 #11 #12 */
 char start[] = "OK START "; /* messaggio di benvento */
 // Le opzioni che il client offre (client) #13
-char illustration[] = "Enter the numbers whose average and variance must be calculated, according to the criterion you prefer\n";
+char illustration[] = "Enter the numbers whose average and variance must be calculated, \naccording to the criterion you prefer\n";
 int execute_command(int simpleSocket);  /* Esegue i comandi #14 */
 char command_line[] = "\nCommand > "; /* Command > */
 
@@ -171,22 +171,6 @@ int print_messages(char buffer[])
 
 int error_checking(int simpleSocket, int val)    /* aspetta un messaggio del servre e controlla se questo è di errore (return 1 se ha un errore) */
 {
-    // * 8. Se la risposta indica la corretta ricezione di dati (caso 7a), 
-    // e il numero di dati ricevuti corrisponde al numero di dati trasmessi, 
-    // il client torna al punto 5 (o al punto 6a se i dati dell’utente sono già stati raccolti) e 
-    // manda un nuovo insieme di dati al server
-    
-    // * 9. Se la risposta indica la corretta ricezione di dati (caso 7a), 
-    // ma il numero di dati ricevuti è diverso dal numero di dati trasmessi, 
-    // il client segnala l’errore all’utente e torna al punto 6b per mandare al server il messaggio di fine dati “0”
-    
-    // * 10. Se il client ha spedito il messaggio di fine dati `0` e riceve come risposta l’elaborazione con successo 
-    // (caso 7b), il client ne estrae le informazioni e le riporta all’utente in maniera opportunamente informativa, 
-    // dopo di che chiude la connessione e termina l’esecuzione 
-    
-    // * 11. Se il client ha spedito il messaggio di fine dati `0` e la risposta indica un errore (caso 7d), 
-    // il client lo comunica all’utente riportando il messaggio del server (senza i delimitatori del protocollo), 
-    // insieme ad un eventuale messaggio da parte del client, dopo di che chiude la connessione e termina l’esecuzione
     int i;
     char buffer[MAX_CHAR];
     while (1)
@@ -209,61 +193,65 @@ int text(int simpleSocket)  /* Inserimento del testo #14  (return 1 se ha un err
 {
     int ch, i = 0;
     int cifre = 1;
-    int caratteri = 0;
+    int caratteri = 1;
     char char_caratteri[4];
     char val[MAX_CHAR];
     char buffer[MAX_CHAR];
-    // conta numeri
-    while(i < MAX_CHAR-cifre)
+    memset(&val, '\0', sizeof(val));
+    memset(&buffer, '\0', sizeof(buffer));
+    // conta caratteri
+    while(i < MAX_CHAR)
     {
-        if (isgraph(val[i]) != 0)
-            return 1;
-        if (val[i] != ' ')
+        if ((ch = getchar()) != '\n' && ch != EOF)
+        {
+            buffer[i] = ch;
+            i++;
+        }
+        else
+        {break;}
+    }
+    buffer[i] = '\0';
+    // conta numeri
+    int n = 0;
+    while(n < MAX_CHAR && buffer[n] != '\0')
+    {
+        if (buffer[n] == ' ' && buffer[n] != '\0')
         {
             caratteri++;
-            while (val[i] == ' ')
-                i++;
+            while (buffer[n] == ' ')
+                n++;
         }
-        else if ((ch = getchar()) == '\n' || ch == EOF)
-            break;
+        n++;
     }
-    val[i] = '\0';
     // invia messaggio
     if(caratteri != 0)
     {
         sprintf(char_caratteri, "%d", caratteri);
-        strcat(buffer, char_caratteri);
-        strcat(buffer, " ");
-        strcat(buffer, val);
-        strcat(buffer, "\n");
-        write(simpleSocket, buffer, strlen(buffer)); 
-        memset(&buffer, '\0', sizeof(buffer));
-    }
-    else
-    {
-        strcat(buffer, "0");
-        strcat(buffer, "\n");
-        write(simpleSocket, buffer, strlen(buffer)); 
-        memset(&buffer, '\0', sizeof(buffer));
-    }
-    // controlla risposta del server
-    if(!error_checking(simpleSocket, caratteri))
-        return error_checking(simpleSocket, caratteri);
-    else
-        return 1;
-    
-    if(i >= MAX_CHAR-cifre) // se il messaggio è troppo grande
-        if(text(simpleSocket))
-            return 1;
-    else 
-    {
-        if(text(simpleSocket))
-            return 1;
+        strcat(val, char_caratteri);
+        strcat(val, " ");
+        strcat(val, buffer);
+        strcat(val, "\n");
+        write(simpleSocket, val, strlen(val)); 
+        memset(&val, '\0', sizeof(val));
+        // controlla risposta del server
+        printf("ciao\n");
         if(!error_checking(simpleSocket, caratteri))
-{            write(simpleSocket, "0", strlen(buffer)); 
-            read(simpleSocket, buffer, sizeof(buffer));
-            printf("%s\n",buffer);
-            return error_checking(simpleSocket, caratteri);}
+            return error_checking(simpleSocket, caratteri);
+        else
+            return 1;
+        printf("ciao\n");
+        if(text(simpleSocket))
+            return 1;
+    }
+    else
+    {
+        strcat(val, "0");
+        strcat(val, "\n");
+        write(simpleSocket, val, strlen(val)); 
+        memset(&val, '\0', sizeof(val));
+        // controlla risposta del server
+        if(!error_checking(simpleSocket, caratteri))
+            return error_checking(simpleSocket, caratteri);
         else
             return 1;
     }
@@ -275,17 +263,11 @@ int execute_command(int simpleSocket)
     memset(&buffer, '\0', sizeof(buffer));
     int ch, returnStatus;
     
-    if (strncmp(buffer, "/n", 5) == 0)
-    {
-        printf("Riprova\n"); 
-        for (int i = 0;(ch = getchar()) != '\n' && ch != EOF ; i++){}
-        return 1;
-    }
-    else
+    if ((ch = getchar()) != '\n' && ch != EOF)
         if(text(simpleSocket))
             return 0;
 
     memset(&buffer, '\0', sizeof(buffer));
-
+    printf("Fine\n");
     return 1;
 }
