@@ -8,11 +8,6 @@
 #include <arpa/inet.h>
 #include <ctype.h>
 
-// * 7. Dopo aver trasmesso ogni messaggio, il client si pone in attesa di una risposta da parte del server. Le risposte possibili sono:
-//    * a. OK DATA <numero>
-//    * b. OK STATS <numero> <media> <varianza>
-//    * c. ERR DATA <messaggio>
-//    * d. ERR STATS <messaggio> 
 #define MAX_CHAR 512    /* lunghezza massima */
 
 int print_messages(char returnStatus[]);    /* stampa il <MESSAGGIO> del messaggio ricevuto. Se il messaggio non ha errori sintattici ritorna 1 altrimenti 0 #11 #12 */
@@ -278,5 +273,5 @@ int execute_command(int simpleSocket)
     }
 
     memset(&buffer, '\0', sizeof(buffer));
-    return 1;
+    return 0;
 }

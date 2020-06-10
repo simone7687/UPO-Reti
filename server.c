@@ -138,6 +138,46 @@ int data_error_checking(int outcome, int n, int simpleChildSocket)
     // input di chiusura del programma
     return !outcome;
 }
+
+void send_med_var(int n, int sum, int simpleChildSocket)
+{
+    // lunghezza massima di 512 caratteri #1
+    char buffer[MAX_CHAR];
+    char cn[7];
+    char cvar[7];
+    char cmed[7];
+    float var;
+    float med;
+    char err[] = "ERR ";
+    char ok[] = "OK ";
+    memset(&buffer, '\0', sizeof(buffer));
+
+    // identifica l’esito positivo o negativo del messaggio e può assumere i valori OK ed ERR
+    if (n > 1)
+    {
+        strcpy(buffer, ok);
+        strcat(buffer, "STATS ");
+        sprintf(cn, "%d ", n);
+        strcat(buffer, cn);
+        med = sum/n;
+        sprintf(cmed, "%.1f ", med);
+        strcat(buffer, cmed);
+        var = med*med-med;
+        sprintf(cvar, "%.1f", var);
+        strcat(buffer, cvar);
+    }
+    else
+    {
+        strcpy(buffer, err);
+        strcat(buffer, "STATS 'I can't calculate the variance of 1 sample'");
+    }
+    strcat(buffer, "\n");
+
+    fprintf(stderr, "%s", buffer);
+    // invia un messaggio al client
+    write(simpleChildSocket, buffer, strlen(buffer));
+}
+
 int error_checking(int outcome, int type, int simpleChildSocket)
 {
     // lunghezza massima di 512 caratteri #1
@@ -277,23 +317,34 @@ int sumVal(char val[])
 {
     int sum = 0;
     char s[strlen(val)];
-
+    int i = 0;
     int l;
     int k = 0;
-    // memset(&val, '\0', sizeof(val));
-    for (int i = 0; val[i] != ' ' && val[i] != '\0'; i++) {}
-    for (int i = 0; val[i] == ' '; i++) {}
-    for (int i = 0; val[i] != '\0'; i++, k++)
+    while (val[i] != ' ' && val[i] != '\0') 
+        i++;
+    while (val[i] == ' ') 
+        i++;
+    while (val[i] != '\0'|| val[i] == '\n')
     {
         s[k] = val[i];
-        if(val[i] != ' ')
+        if(val[i+1] == ' ' || val[i+1] == '\0'|| val[i+1] == '\n')
         {
+            i++;
             l = atoi(s);
+            k=0;
             sum += l;
-            for (int j = 0; val[i] == ' ' ; i++) {}
+            memset(&s, '\0', sizeof(s));
+            while (val[i] == ' ') 
+            {
+                i++;
+            }
+        }
+        else
+        {
+            i++;
+            k++;
         }
     }
-    // memset(&val, '\0', sizeof(val));
     return sum;
 }
 
@@ -319,7 +370,7 @@ int client_waiting(int simpleChildSocket)
                     error_checking(returnStatus, SYNTAX, simpleChildSocket);
                     break;
                 case ZEROVAL:
-                    // TODO: 8.c
+                    send_med_var(count, sum, simpleChildSocket);
                     return 0;
                 default:
                     if (controlcommand(buffer, returnStatus))
@@ -330,9 +381,6 @@ int client_waiting(int simpleChildSocket)
                     }
                     else
                         data_error_checking(0, returnStatus, simpleChildSocket);
-                    // TODO: risponde con il messaggio `OK DATA <numero_dati_letti>` 
-                    // ovvero la stringa `OK DATA` seguita da uno spazio e da una stringa numerica 
-                    // che rappresenta il valore numero di dati estratti dal messaggio ricevuto.
                     break;
             }
         }
